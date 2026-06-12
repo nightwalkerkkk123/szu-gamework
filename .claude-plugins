@@ -1,0 +1,9 @@
+# Claude Code Unity Plugins
+# Load these when starting Claude Code:
+#   claude --plugin-dir path/to/unity-knowledge-skills --plugin-dir path/to/unity-middleware-skills
+#
+# Plugin locations (relative to toolkit clone):
+# - /e/CODE/claude-unity-game-studio/unity-knowledge-skills
+# - /e/CODE/claude-unity-game-studio/unity-middleware-skills
+#
+# Or copy them next to your project for automatic discovery.
