@@ -36,7 +36,7 @@ namespace SugarRush.Foundation
             Bind("Pause", () => OnPausePressed?.Invoke());
         }
 
-        private void OnEnable()
+        private void Start()
         {
             _gameplayMap?.Enable();
         }
