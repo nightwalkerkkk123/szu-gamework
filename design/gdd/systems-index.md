@@ -22,11 +22,11 @@
 
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
-| 1 | Input System | Core | MVP | Not Started | — | — |
+| 1 | Input System | Core | MVP | Designed | design/gdd/input-system.md | — |
 | 2 | Game Flow | Core | MVP | Not Started | — | Input System |
-| 3 | Skiing Controller | Gameplay | MVP | Not Started | — | Input System, Obstacle & Hazard |
+| 3 | Skiing Controller | Gameplay | MVP | In Design | design/gdd/skiing-controller.md | Input System, Obstacle & Hazard |
 | 4 | Camera Follow (inferred) | Core | MVP | Not Started | — | Skiing Controller |
-| 5 | Glucose System | Gameplay | MVP | Not Started | — | — |
+| 5 | Glucose System | Gameplay | MVP | Designed | design/gdd/glucose-system.md | — |
 | 6 | Obstacle & Hazard | Gameplay | MVP | Not Started | — | Skiing Controller |
 | 7 | Item & Pickup System | Gameplay | MVP | Not Started | — | Glucose System, Obstacle & Hazard |
 | 8 | Environmental Zones | Gameplay | MVP | Not Started | — | Glucose System, Level Data |
@@ -161,10 +161,10 @@
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 18 |
-| Design docs started | 0 |
+| Design docs started | 3 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 0 / 14 |
+| MVP systems designed | 3 / 14 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
@@ -172,8 +172,10 @@
 ## Next Steps
 
 - [x] 系统枚举与依赖映射（2026-06-12）
+- [x] 完成 Glucose System GDD（2026-06-13）
+- [x] 完成 Input System GDD（2026-06-13）
+- [ ] 完成 Skiing Controller GDD（进行中，2026-06-13）
 - [ ] 审阅并批准本索引
-- [ ] 按设计顺序撰写 MVP GDD — 首个：`/design-system glucose-system`
 - [ ] 对 Glucose + Skiing 尽早 `/prototype` 验证手感与机制转译
 - [ ] 每份 GDD 完成后 `/design-review`
 - [ ] 全部 MVP GDD 完成后 `/gate-check pre-production`

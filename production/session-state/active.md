@@ -24,7 +24,7 @@
 | 1 | 创建 ProjectConfig.yaml | ✅ Done | 2026-06-13 初始化 |
 | 2 | Glucose System GDD | ✅ Done | 2026-06-13 |
 | 3 | Input System GDD | ✅ Done | 2026-06-13 |
-| 4 | Skiing Controller 原型 | 🔄 In Progress | W2 最高风险，决定手感 |
+| 4 | Skiing Controller GDD | ✅ Done | W2 最高风险，决定手感 |
 | 5 | 3 个 MVP 道具实现 | ⬜ Pending | 胰岛素 / 降糖药 / 高糖雪花 |
 | 6 | L1 医院雪屋可玩 | ⬜ Pending | 验证核心循环 |
 
@@ -36,22 +36,24 @@
 - 更新会话状态 — 明确当前 Phase、Sprint Goal、任务列表
 - 完成 Glucose System GDD 与 Input System GDD
 - 合并 `docs/w2-gdds` → `main`
+- 完成 Skiing Controller GDD
 
 ---
 
 ## In Progress
 
-- **Skiing Controller GDD** — W2 最高风险系统，决定滑行手感
+- **Skiing Controller 原型验证** — 下一步用占位美术验证手感
+- **Obstacle & Hazard GDD** — 摔倒与碰撞让决策有后果
 
 ---
 
 ## Pending Decisions
 
+- [x] Skiing Controller 是否用 Rigidbody2D 物理驱动，还是纯 transform 插值？—— **本 GDD 推荐 Rigidbody2D**，待原型验证
 - [ ] 是否启用 Unity MCP / GitHub MCP？（当前全部 false）
 - [ ] 是否使用 DOTween / PrimeTween 等 tweening 中间件？（当前 none）
 - [ ] 文件夹策略是否保持 feature-based？现有 `Assets/` 下为 type-based 结构
 - [ ] L3 低血糖区是否纳入 W2 还是 W3？
-- [ ] Skiing Controller 是否用 Rigidbody2D 物理驱动，还是纯 transform 插值？
 
 ---
 
@@ -66,8 +68,8 @@
 ## Active TODOs in Code
 
 ```
-// TODO: W2 核心循环原型待启动
-// ASSET: 糖糖 placeholder sprite、基础雪山 tileset
+// TODO: W2 核心循环原型 — 实现 SkiingController + GlucoseSystem 占位验证
+// ASSET: 糖糖 placeholder sprite、基础雪山 tileset、跳跃/翻滚动画占位
 ```
 
 ---
@@ -75,6 +77,7 @@
 ## Notes for Next Session
 
 - 项目已完成 W1 概念与系统拆分（`design/gdd/systems-index.md` 含 18 系统）
-- 已完成 Glucose System 与 Input System GDD
-- 接下来：完成 Skiing Controller GDD，然后进入 `/prototype` 验证手感
-- 后续系统依赖顺序：Skiing → Obstacle & Hazard → Item & Pickup → Level Data → Environmental Zones → Scoring → HUD/Result
+- 已完成 Foundation 层：Glucose System、Input System
+- 已完成 Core 层首个系统：Skiing Controller GDD
+- 接下来：进入 `/prototype` 验证滑行手感，或继续撰写 Obstacle & Hazard GDD
+- 后续系统依赖顺序：Obstacle & Hazard → Item & Pickup → Level Data → Environmental Zones → Scoring → HUD/Result
