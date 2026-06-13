@@ -15,8 +15,8 @@ MonoBehaviour:
   <LevelId>k__BackingField: L1
   <DisplayName>k__BackingField: Hospital Chalet
   <Description>k__BackingField: 
-  <TargetDistanceMeters>k__BackingField: 230
-  <ParTimeSeconds>k__BackingField: 75
+  <TargetDistanceMeters>k__BackingField: 180
+  <ParTimeSeconds>k__BackingField: 60
   <StartGlucose>k__BackingField: 60
   <BaseScore>k__BackingField: 1000
   <TimeBonusMultiplier>k__BackingField: 10

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 877ee5e26ae465b4481802f22dd74af8, type: 3}
   m_Name: SkiingConfig
   m_EditorClassIdentifier: 
-  baseAcceleration: 12
-  maxSpeed: 22
+  baseAcceleration: 9
+  maxSpeed: 16
   groundFriction: 2
-  slopeAngle: 15
+  slopeAngle: 12
   jumpForce: 14
   gravityScale: 2.5
   airControl: 0.4

@@ -154,7 +154,7 @@ namespace SugarRush.Editor
             float sin = Mathf.Sin(rad);
 
             var ground = new GameObject("Ground");
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 15; i++)
             {
                 float distance = i * segmentLength;
                 float x = distance * cos;
@@ -185,7 +185,7 @@ namespace SugarRush.Editor
             var rock = GameObject.CreatePrimitive(PrimitiveType.Cube);
             rock.name = "StumbleRock";
             rock.transform.SetParent(root.transform);
-            rock.transform.position = new Vector3(55f, GetGroundY(55f) + 0.4f, 0f);
+            rock.transform.position = new Vector3(40f, GetGroundY(40f) + 0.4f, 0f);
             rock.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
             UnityEngine.Object.DestroyImmediate(rock.GetComponent<Collider>());
             rock.AddComponent<BoxCollider2D>();
@@ -195,7 +195,7 @@ namespace SugarRush.Editor
             var tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             tree.name = "LowBranch";
             tree.transform.SetParent(root.transform);
-            tree.transform.position = new Vector3(115f, GetGroundY(115f) + 0.6f, 0f);
+            tree.transform.position = new Vector3(90f, GetGroundY(90f) + 0.6f, 0f);
             tree.transform.localScale = new Vector3(0.5f, 0.8f, 0.5f);
             UnityEngine.Object.DestroyImmediate(tree.GetComponent<Collider>());
             tree.AddComponent<BoxCollider2D>();
@@ -206,7 +206,7 @@ namespace SugarRush.Editor
         private static void CreateHazardZone(GlucoseSystem glucoseSystem)
         {
             var go = new GameObject("HazardZone_ColdWind");
-            go.transform.position = new Vector3(160f, GetGroundY(160f) + 4f, 0f);
+            go.transform.position = new Vector3(130f, GetGroundY(130f) + 4f, 0f);
             go.transform.localScale = new Vector3(20f, 8f, 1f);
 
             var col = go.AddComponent<BoxCollider2D>();
@@ -232,9 +232,9 @@ namespace SugarRush.Editor
         {
             var root = new GameObject("Items");
 
-            CreatePickup(root.transform, "InsulinPickup", new Vector3(75f, GetGroundY(75f) + 1.5f, 0f), insulin, Color.blue);
-            CreatePickup(root.transform, "PillsPickup", new Vector3(135f, GetGroundY(135f) + 1.5f, 0f), pills, Color.green);
-            CreatePickup(root.transform, "SnowflakePickup", new Vector3(195f, GetGroundY(195f) + 1.5f, 0f), snowflake, Color.yellow);
+            CreatePickup(root.transform, "InsulinPickup", new Vector3(60f, GetGroundY(60f) + 1.5f, 0f), insulin, Color.blue);
+            CreatePickup(root.transform, "PillsPickup", new Vector3(110f, GetGroundY(110f) + 1.5f, 0f), pills, Color.green);
+            CreatePickup(root.transform, "SnowflakePickup", new Vector3(150f, GetGroundY(150f) + 1.5f, 0f), snowflake, Color.yellow);
         }
 
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
@@ -258,7 +258,7 @@ namespace SugarRush.Editor
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "FinishLine";
-            go.transform.position = new Vector3(230f, GetGroundY(230f) + 2f, 0f);
+            go.transform.position = new Vector3(180f, GetGroundY(180f) + 2f, 0f);
             go.transform.localScale = new Vector3(1f, 4f, 1f);
             UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
             var trigger = go.AddComponent<BoxCollider2D>();
@@ -381,17 +381,25 @@ namespace SugarRush.Editor
             go.transform.SetParent(parent, false);
             var text = go.AddComponent<UnityEngine.UI.Text>();
             text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            text.fontSize = 22;
-            text.color = Color.black;
+            text.fontSize = 28;
+            text.color = Color.white;
             text.alignment = anchor;
             text.text = name;
+
+            var outline = go.AddComponent<UnityEngine.UI.Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            var shadow = go.AddComponent<UnityEngine.UI.Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
+            shadow.effectDistance = new Vector2(2f, -2f);
 
             var rect = go.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0f, 1f);
             rect.anchorMax = new Vector2(0f, 1f);
             rect.pivot = new Vector2(0f, 1f);
             rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = new Vector2(400f, 30f);
+            rect.sizeDelta = new Vector2(420f, 34f);
 
             return text;
         }
