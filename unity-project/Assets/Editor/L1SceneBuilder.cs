@@ -81,7 +81,7 @@ namespace SugarRush.Editor
                 new SegmentPickup { DistanceAlongSegment = 30f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow });
 
             var segments = new List<LevelSegmentData> { segment1, segment2, segment3 };
-            level.Segments = segments;
+            level.SetSegments(segments);
             EditorUtility.SetDirty(level);
             AssetDatabase.SaveAssets();
 

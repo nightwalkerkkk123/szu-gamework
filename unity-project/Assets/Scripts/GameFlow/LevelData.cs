@@ -23,6 +23,14 @@ namespace SugarRush.GameFlow
         [field: SerializeField] public List<LevelSegmentData> Segments { get; private set; } = new();
 
         /// <summary>
+        /// Assign the segment list (used by editor tooling). Replaces any existing segments.
+        /// </summary>
+        public void SetSegments(List<LevelSegmentData> segments)
+        {
+            Segments = segments ?? new List<LevelSegmentData>();
+        }
+
+        /// <summary>
         /// Total length of all segments along the X axis (approximate, assumes shallow slopes).
         /// </summary>
         public float TotalSegmentLength
