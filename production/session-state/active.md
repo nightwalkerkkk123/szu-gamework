@@ -37,13 +37,14 @@
 - 完成 Glucose System GDD 与 Input System GDD
 - 合并 `docs/w2-gdds` → `main`
 - 完成 Skiing Controller GDD
+- 完成 Obstacle & Hazard GDD
 
 ---
 
 ## In Progress
 
-- **Skiing Controller 原型验证** — 下一步用占位美术验证手感
-- **Obstacle & Hazard GDD** — 摔倒与碰撞让决策有后果
+- **Item & Pickup System GDD** — 3 个 MVP 道具（胰岛素/降糖药/高糖雪花）
+- **Game Flow GDD** — 菜单→关卡→暂停→结算状态机
 
 ---
 
@@ -78,6 +79,6 @@
 
 - 项目已完成 W1 概念与系统拆分（`design/gdd/systems-index.md` 含 18 系统）
 - 已完成 Foundation 层：Glucose System、Input System
-- 已完成 Core 层首个系统：Skiing Controller GDD
-- 接下来：进入 `/prototype` 验证滑行手感，或继续撰写 Obstacle & Hazard GDD
-- 后续系统依赖顺序：Obstacle & Hazard → Item & Pickup → Level Data → Environmental Zones → Scoring → HUD/Result
+- 已完成 Core 层：Skiing Controller、Obstacle & Hazard
+- 距离核心循环原型可开工还差：Item & Pickup、Game Flow、Level Data（HUD/Camera 可边做边补）
+- 后续系统依赖顺序：Item & Pickup → Game Flow → Level Data → HUD/Camera → Scoring → Result
