@@ -30,7 +30,7 @@
 | 6 | Obstacle & Hazard | Gameplay | MVP | Designed | design/gdd/obstacle-hazard-system.md | Skiing Controller |
 | 7 | Item & Pickup System | Gameplay | MVP | Designed | design/gdd/item-pickup-system.md | Glucose System, Obstacle & Hazard |
 | 8 | Environmental Zones | Gameplay | MVP | Not Started | — | Glucose System, Level Data |
-| 9 | Level Data & Progression | Gameplay | MVP | Not Started | — | Skiing Controller, Obstacle & Hazard, Environmental Zones, Item System |
+| 9 | Level Data & Progression | Gameplay | MVP | Designed | design/gdd/level-data-progression.md | Skiing Controller, Obstacle & Hazard, Environmental Zones, Item System |
 | 10 | Scoring & Rating | Progression | MVP | Not Started | — | Glucose System, Level Data |
 | 11 | HUD | UI | MVP | Not Started | — | Glucose System, Level Data, Item System |
 | 12 | Menus & Pause | UI | MVP | Not Started | — | Game Flow |
@@ -161,10 +161,10 @@
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 18 |
-| Design docs started | 6 |
+| Design docs started | 7 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 6 / 14 |
+| MVP systems designed | 7 / 14 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
@@ -178,6 +178,7 @@
 - [x] 完成 Obstacle & Hazard GDD（2026-06-13）
 - [x] 完成 Item & Pickup System GDD（2026-06-13）
 - [x] 完成 Game Flow GDD（2026-06-13）
+- [x] 完成 Level Data & Progression GDD（2026-06-13）
 - [ ] 审阅并批准本索引
 - [ ] 对 Glucose + Skiing 尽早 `/prototype` 验证手感与机制转译
 - [ ] 每份 GDD 完成后 `/design-review`

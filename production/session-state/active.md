@@ -40,12 +40,14 @@
 - 完成 Obstacle & Hazard GDD
 - 完成 Item & Pickup System GDD
 - 完成 Game Flow GDD
+- 完成 Level Data & Progression GDD
 
 ---
 
 ## In Progress
 
-- **Level Data & Progression GDD** — L1 医院雪屋关卡片段与终点
+- **核心循环原型可开工** — 7 份 MVP GDD 已完成
+- **W2 下一步**：进入 Unity 实现或先做原型验证
 
 ---
 
@@ -82,5 +84,6 @@
 - 已完成 Foundation 层：Glucose System、Input System
 - 已完成 Core 层：Skiing Controller、Obstacle & Hazard
 - 已完成 Feature 层：Item & Pickup System
-- 距离核心循环原型可开工还差：Level Data（HUD/Camera 可边做边补）
-- 后续系统依赖顺序：Level Data → HUD/Camera → Scoring → Result
+- 核心循环原型最小 GDD 集合已完成：Glucose / Input / Skiing / Obstacle / Item / GameFlow / LevelData
+- 接下来可进入 Unity 实现：先搭场景占位，验证滑行手感与血糖机制转译
+- 后续可边做边补：HUD/Camera、Scoring、Result、Menus、Environmental Zones
