@@ -39,12 +39,12 @@
 - 完成 Skiing Controller GDD
 - 完成 Obstacle & Hazard GDD
 - 完成 Item & Pickup System GDD
+- 完成 Game Flow GDD
 
 ---
 
 ## In Progress
 
-- **Game Flow GDD** — 菜单→关卡→暂停→结算状态机
 - **Level Data & Progression GDD** — L1 医院雪屋关卡片段与终点
 
 ---
@@ -82,5 +82,5 @@
 - 已完成 Foundation 层：Glucose System、Input System
 - 已完成 Core 层：Skiing Controller、Obstacle & Hazard
 - 已完成 Feature 层：Item & Pickup System
-- 距离核心循环原型可开工还差：Game Flow、Level Data（HUD/Camera 可边做边补）
-- 后续系统依赖顺序：Game Flow → Level Data → HUD/Camera → Scoring → Result
+- 距离核心循环原型可开工还差：Level Data（HUD/Camera 可边做边补）
+- 后续系统依赖顺序：Level Data → HUD/Camera → Scoring → Result
