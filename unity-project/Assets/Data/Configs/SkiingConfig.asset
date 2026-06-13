@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 877ee5e26ae465b4481802f22dd74af8, type: 3}
+  m_Name: SkiingConfig
+  m_EditorClassIdentifier: 
+  baseAcceleration: 12
+  maxSpeed: 22
+  groundFriction: 2
+  slopeAngle: 15
+  jumpForce: 14
+  gravityScale: 2.5
+  airControl: 0.4
+  rollDuration: 0.6
+  rollCooldown: 0.3
+  rollSpeedBoost: 4
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 256
+  groundCheckOffset: 0.55
+  groundCheckDistance: 0.1
+  stumbleSpeedFactor: 0.4
+  stumbleDuration: 0.8
