@@ -10,7 +10,7 @@
 - **Game**: 糖大冒险：雪山狂飙 / SugarRush
 - **ProjectConfig**: `docs/ProjectConfig.yaml` — Unity 2022.3.62f3c1, Built-in, UGUI, feature-based folders, ai_mode: guided
 - **Current Phase**: Phase 1 — Pre-Production (W1 完成，W2 启动前)
-- **Branch**: `main`
+- **Branch**: `docs/w2-gdds`
 - **Review Mode**: lean
 
 ---
