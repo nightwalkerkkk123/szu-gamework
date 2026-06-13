@@ -41,13 +41,16 @@
 - 完成 Item & Pickup System GDD
 - 完成 Game Flow GDD
 - 完成 Level Data & Progression GDD
+- 完成 W2 核心 GDD 设计审阅（Lean）
+- 修复审阅发现的关键问题：
+  - `OnCrisisFailed` 事件在 Glucose System GDD 中显式定义
+  - 高糖雪花速度加成明确为独立临时 bonus（与 Glucose modifier 相乘）
 
 ---
 
 ## In Progress
 
-- **核心循环原型可开工** — 7 份 MVP GDD 已完成
-- **W2 下一步**：进入 Unity 实现或先做原型验证
+- **核心循环原型开发准备** — 设计审阅完成，等待进入 Unity 实现
 
 ---
 

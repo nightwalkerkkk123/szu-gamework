@@ -54,7 +54,7 @@
 |------|------|--------|----------|----------|---------------|
 | **Insulin Spray** 胰岛素喷雾 | Active | 立即 `-30` 血糖 | Instant | 3.0 s | 不叠加，使用后进入冷却 |
 | **Hypoglycemic Pill** 降糖药瓶 | Active / Buff | 每秒 `-8` 血糖，持续 5s | 5.0 s | 8.0 s | 刷新持续时间，不叠加每秒数值 |
-| **Sugar Snowflake** 高糖雪花 | Active / Buff | 立即 `+25` 血糖；同时 3s 内 `SpeedModifier +0.15` | 3.0 s | 5.0 s | 刷新持续时间，不叠加速度加成 |
+| **Sugar Snowflake** 高糖雪花 | Active / Buff | 立即 `+25` 血糖；同时 3s 内临时速度加成 `+0.15`（与 Glucose SpeedModifier 相乘） | 3.0 s | 5.0 s | 刷新持续时间，不叠加速度加成 |
 
 > 注：以上数值为起点，需通过原型验证和内部试玩调整。
 
@@ -76,11 +76,9 @@ public class ItemData : ScriptableObject
     public float deltaPerSecond;        // 持续每秒血糖变化（可正可负）
     public float duration;              // 持续效果时长
     
-    [Header("Modifiers")]
-    public bool overridesSpeedModifier; // 是否覆盖速度修饰
-    public float speedModifierBonus;    // 额外速度加成（加法）
-    public bool overridesControlModifier;
-    public float controlModifierBonus;
+    [Header("Temporary Modifiers")]
+    public float speedModifierBonus;    // 临时速度加成：与 Glucose SpeedModifier 相乘（加法叠加到 1.0 后相乘）
+    public float controlModifierBonus;  // 临时操控加成：与 Glucose ControlModifier 相乘（同上）
     
     [Header("Cooldown")]
     public float cooldown;              // 使用冷却
@@ -106,6 +104,8 @@ On UseItemN Input:
             GlucoseSystem.ApplyBuffOverTime(item.deltaPerSecond, item.duration, Source.Item)
         if item.speedModifierBonus != 0:
             SkiingController.ApplyTemporarySpeedBonus(item.speedModifierBonus, item.duration)
+        if item.controlModifierBonus != 0:
+            SkiingController.ApplyTemporaryControlBonus(item.controlModifierBonus, item.duration)
         Spawn(item.useEffectPrefab)
         Play(item.useSound)
         EventBus.Publish(ItemUsedEvent)
@@ -129,7 +129,7 @@ OnTriggerEnter2D (ItemPickup):
 | Aspect | Design |
 |--------|--------|
 | 立即效果 | 血糖 `+25`，进入 Above Normal 或 High |
-| 速度加成 | 3s 内 `SpeedModifier +0.15`，叠加到 Glucose 的 modifier 上 |
+| 速度加成 | 3s 内临时速度加成 `+0.15`；最终速度倍率 = `GlucoseSpeedModifier * (1.0 + 0.15)` |
 | 风险 | 高血糖时再吃可能触发 crisis；需要配合胰岛素或降糖药 |
 | 教学点 | 对应「高糖食物短期爽、长期风险」 |
 | 使用场景 | 需要冲刺越过长障碍带；或低血糖急救（但会过头） |
@@ -295,5 +295,5 @@ MVP 规则：
 |----------|-------|----------|-----------|
 | 道具数值是否需要在原型阶段大幅调整？ | game-designer | W2 末 | 依赖内部试玩反馈 |
 | 是否允许「胰岛素 + 降糖药」同时使用？ | game-designer | W2 中 | 当前 GDD 允许，但叠加效果需谨慎 |
-| 高糖雪花的速度加成是否叠加到 Glucose modifier 还是独立？ | systems-designer | W2 中 | 本 GDD 建议独立临时 bonus，最终与 Skiing Controller 协商 |
+| 高糖雪花的速度加成是否叠加到 Glucose modifier 还是独立？ | systems-designer | W2 中 | ✅ 已解决：作为独立临时 bonus，与 Glucose modifier 相乘 |
 | 道具栏是否支持键盘/手柄快速切换焦点？ | ux-designer | W2 中 | 当前固定 3 槽位，无需切换 |

@@ -76,6 +76,7 @@
 | **HUD** | 订阅事件 | Glucose System → `OnGlucoseChanged`, `OnStateEntered/Exited` |
 | **Audio System** | 订阅事件 | Glucose System → `OnStateEntered` 触发心跳/警报音 |
 | **Game Feel & Feedback** | 订阅事件 | Glucose System → `OnStateEntered` 触发粒子/抖动/漫画框 |
+| **Game Flow** | 订阅事件 | Glucose System → `OnCrisisFailed(bool isLow)` 触发关卡失败 |
 | **Scoring & Rating** | 查询接口 | Scoring 读取历史最高/最低血糖、进入危机次数 |
 
 **所有权规则**：Glucose System 是血糖值的唯一权威源。任何系统想改变血糖，必须通过 `ApplyGlucoseDelta` 或 `ApplyBuffOverTime`，不能直接写 `_currentGlucose`。
@@ -140,6 +141,7 @@ VisionModifier = Lerp(1.0, targetVisionModifier, transitionCurve)
 | HUD | Depends on Glucose System | 订阅状态事件 |
 | Audio System | Depends on Glucose System | 订阅状态事件 |
 | Game Feel & Feedback | Depends on Glucose System | 订阅状态事件 |
+| Game Flow | Depends on Glucose System | 订阅 `OnCrisisFailed` |
 | Scoring & Rating | Depends on Glucose System | 查询历史血糖数据 |
 
 ## Tuning Knobs
@@ -215,7 +217,7 @@ VisionModifier = Lerp(1.0, targetVisionModifier, transitionCurve)
 | 区域被动影响血糖 | `design/gdd/environmental-zones.md` | `ApplyPassiveDelta` API | Data dependency |
 | 血糖影响滑行速度/操控 | `design/gdd/skiing-controller.md` | `SpeedModifier`, `ControlModifier` | Data dependency |
 | 血糖影响视野/抖动 | `design/gdd/camera-follow.md` | `VisionModifier` | Data dependency |
-| 危机/失败判定 | `design/gdd/game-flow.md` | Failure state transition | State trigger |
+| 危机/失败判定 | `design/gdd/game-flow.md` | `OnCrisisFailed` event | State trigger |
 | 血糖数据用于评分 | `design/gdd/scoring-rating.md` | Historical glucose stats | Data dependency |
 
 > 注：当前引用的 GDD 可能尚未撰写，但接口命名已在 `systems-index.md` 中约定。
