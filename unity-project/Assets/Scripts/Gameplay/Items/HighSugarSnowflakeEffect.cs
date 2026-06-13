@@ -16,7 +16,10 @@ namespace SugarRush.Gameplay.Items
         public override void Apply(GlucoseSystem glucoseSystem, SkiingController skiingController)
         {
             glucoseSystem?.ApplyDelta(_instantDelta);
-            skiingController?.StartCoroutine(SpeedBoostRoutine(skiingController));
+            if (skiingController != null)
+            {
+                skiingController.StartCoroutine(SpeedBoostRoutine(skiingController));
+            }
             Debug.Log($"[Item] High Sugar Snowflake applied: +{_instantDelta:F1} glucose, speed boost x{_speedBoostMultiplier:F2}.", skiingController);
         }
 

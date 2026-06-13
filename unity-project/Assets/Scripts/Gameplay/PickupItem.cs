@@ -1,9 +1,10 @@
+using SugarRush.Foundation;
 using UnityEngine;
 
 namespace SugarRush.Gameplay
 {
     /// <summary>
-    /// World pickup that grants an item effect to the player's inventory.
+    /// World pickup that applies an item effect immediately to the player.
     /// </summary>
     public class PickupItem : MonoBehaviour
     {
@@ -15,9 +16,10 @@ namespace SugarRush.Gameplay
             if (!other.CompareTag("Player")) return;
             if (_itemEffect == null) return;
 
-            if (other.TryGetComponent<PlayerInventory>(out var inventory))
+            if (other.TryGetComponent<GlucoseSystem>(out var glucoseSystem) &&
+                other.TryGetComponent<SkiingController>(out var skiingController))
             {
-                inventory.Equip(_itemEffect);
+                _itemEffect.Apply(glucoseSystem, skiingController);
                 Debug.Log($"[PickupItem] Picked up {_itemEffect.DisplayName}.", this);
 
                 if (_destroyOnPickup)
