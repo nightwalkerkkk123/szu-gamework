@@ -193,14 +193,14 @@ namespace SugarRush.Editor
             SetField(obstacle, "_type", Obstacle.ObstacleType.Stumble);
 
             var tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            tree.name = "CrashTree";
+            tree.name = "LowBranch";
             tree.transform.SetParent(root.transform);
-            tree.transform.position = new Vector3(115f, GetGroundY(115f) + 0.75f, 0f);
-            tree.transform.localScale = new Vector3(0.6f, 1.5f, 0.6f);
+            tree.transform.position = new Vector3(115f, GetGroundY(115f) + 0.6f, 0f);
+            tree.transform.localScale = new Vector3(0.5f, 0.8f, 0.5f);
             UnityEngine.Object.DestroyImmediate(tree.GetComponent<Collider>());
             tree.AddComponent<BoxCollider2D>();
             var treeObstacle = tree.AddComponent<Obstacle>();
-            SetField(treeObstacle, "_type", Obstacle.ObstacleType.Crash);
+            SetField(treeObstacle, "_type", Obstacle.ObstacleType.Stumble);
         }
 
         private static void CreateHazardZone(GlucoseSystem glucoseSystem)
