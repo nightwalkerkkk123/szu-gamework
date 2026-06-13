@@ -142,6 +142,10 @@ namespace SugarRush.GameFlow
             Time.timeScale = win ? 1f : 0f;
 
             _playerController?.SetEnabled(false);
+            if (_glucoseSystem != null)
+            {
+                _glucoseSystem.enabled = false;
+            }
             GameEvents.RaiseGameFinished(win);
 
             Debug.Log($"[GameFlow] Result: {(win ? "Win" : "Lose")}.", this);
