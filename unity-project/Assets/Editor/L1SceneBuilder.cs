@@ -173,8 +173,8 @@ namespace SugarRush.Editor
                 col.sharedMaterial = slipperyGround;
                 platform.layer = groundLayer;
                 var renderer = platform.GetComponent<Renderer>();
-                renderer.material = new Material(renderer.sharedMaterial);
-                renderer.material.color = new Color(0.9f, 0.95f, 1f);
+                renderer.sharedMaterial = new Material(renderer.sharedMaterial);
+                renderer.sharedMaterial.color = new Color(0.9f, 0.95f, 1f);
             }
         }
 
@@ -224,8 +224,8 @@ namespace SugarRush.Editor
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localScale = Vector3.one;
             UnityEngine.Object.DestroyImmediate(visual.GetComponent<Collider>());
-            renderer.material = new Material(renderer.sharedMaterial);
-            renderer.material.color = new Color(0.4f, 0.7f, 1f, 0.3f);
+            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
+            renderer.sharedMaterial.color = new Color(0.4f, 0.7f, 1f, 0.3f);
         }
 
         private static void CreateItems(InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake)
@@ -250,8 +250,8 @@ namespace SugarRush.Editor
             var pickup = go.AddComponent<PickupItem>();
             SetField(pickup, "_itemEffect", effect);
             var renderer = go.GetComponent<Renderer>();
-            renderer.material = new Material(renderer.sharedMaterial);
-            renderer.material.color = color;
+            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
+            renderer.sharedMaterial.color = color;
         }
 
         private static void CreateFinishLine()
@@ -266,8 +266,8 @@ namespace SugarRush.Editor
             trigger.size = new Vector2(1f, 1f);
             go.AddComponent<FinishLine>();
             var renderer = go.GetComponent<Renderer>();
-            renderer.material = new Material(renderer.sharedMaterial);
-            renderer.material.color = Color.magenta;
+            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
+            renderer.sharedMaterial.color = Color.magenta;
         }
 
         private static GameObject CreateGameFlow(SugarRushInput input, GameObject player, LevelData levelData)
