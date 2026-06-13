@@ -9,8 +9,8 @@
 
 - **Game**: 糖大冒险：雪山狂飙 / SugarRush
 - **ProjectConfig**: `docs/ProjectConfig.yaml` — Unity 2022.3.62f3c1, Built-in, UGUI, feature-based folders, ai_mode: guided
-- **Current Phase**: Phase 1 — Pre-Production (W1 完成，W2 启动前)
-- **Branch**: `docs/w2-gdds`
+- **Current Phase**: Phase 1 — Pre-Production (W2 进行中)
+- **Branch**: `main`
 - **Review Mode**: lean
 
 ---
@@ -22,9 +22,9 @@
 | # | Feature / Task | Status | Notes |
 |---|---------------|--------|-------|
 | 1 | 创建 ProjectConfig.yaml | ✅ Done | 2026-06-13 初始化 |
-| 2 | Glucose System GDD | ⬜ Pending | 首个系统设计文档 |
-| 3 | Input System GDD | ⬜ Pending | 键鼠 + 手柄映射 |
-| 4 | Skiing Controller 原型 | ⬜ Pending | W2 最高风险，决定手感 |
+| 2 | Glucose System GDD | ✅ Done | 2026-06-13 |
+| 3 | Input System GDD | ✅ Done | 2026-06-13 |
+| 4 | Skiing Controller 原型 | 🔄 In Progress | W2 最高风险，决定手感 |
 | 5 | 3 个 MVP 道具实现 | ⬜ Pending | 胰岛素 / 降糖药 / 高糖雪花 |
 | 6 | L1 医院雪屋可玩 | ⬜ Pending | 验证核心循环 |
 
@@ -34,13 +34,14 @@
 
 - 项目注册初始化 — 创建 `docs/ProjectConfig.yaml`
 - 更新会话状态 — 明确当前 Phase、Sprint Goal、任务列表
+- 完成 Glucose System GDD 与 Input System GDD
+- 合并 `docs/w2-gdds` → `main`
 
 ---
 
 ## In Progress
 
-- **项目初始化注册** — 刚刚完成基础配置
-- 下一步：撰写 Glucose System GDD（`/design-system glucose-system`）
+- **Skiing Controller GDD** — W2 最高风险系统，决定滑行手感
 
 ---
 
@@ -50,6 +51,7 @@
 - [ ] 是否使用 DOTween / PrimeTween 等 tweening 中间件？（当前 none）
 - [ ] 文件夹策略是否保持 feature-based？现有 `Assets/` 下为 type-based 结构
 - [ ] L3 低血糖区是否纳入 W2 还是 W3？
+- [ ] Skiing Controller 是否用 Rigidbody2D 物理驱动，还是纯 transform 插值？
 
 ---
 
@@ -73,5 +75,6 @@
 ## Notes for Next Session
 
 - 项目已完成 W1 概念与系统拆分（`design/gdd/systems-index.md` 含 18 系统）
-- 接下来按依赖顺序设计系统：Glucose → Input → Skiing → Obstacle → Item → Level → UI
-- 建议优先 `/design-system glucose-system` 并尽早 `/prototype` 验证手感
+- 已完成 Glucose System 与 Input System GDD
+- 接下来：完成 Skiing Controller GDD，然后进入 `/prototype` 验证手感
+- 后续系统依赖顺序：Skiing → Obstacle & Hazard → Item & Pickup → Level Data → Environmental Zones → Scoring → HUD/Result
