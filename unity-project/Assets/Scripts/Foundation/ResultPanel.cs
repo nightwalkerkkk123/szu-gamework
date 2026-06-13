@@ -72,6 +72,12 @@ namespace SugarRush.Foundation
 
         private void RestartLevel()
         {
+            StartCoroutine(RestartLevelAfterFrame());
+        }
+
+        private System.Collections.IEnumerator RestartLevelAfterFrame()
+        {
+            yield return null;
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
