@@ -1,0 +1,67 @@
+# ProjectConfig — 糖大冒险：雪山狂飙 / SugarRush
+# AI 协作主配置快照，基于 W1 设计决策生成
+
+project_name: "糖大冒险：雪山狂飙 / SugarRush"
+genre: "2D Side-scrolling Skiing Runner"
+target_platforms:
+  - "PC (Windows)"
+  - "PC (macOS)"
+  - "PC (Linux)"
+
+# Unity
+unity_version: "2022.3.62f3c1"
+render_pipeline: "Built-in"       # Built-in | URP | HDRP
+scripting_backend: "IL2CPP"       # IL2CPP | Mono
+ui_system: "UGUI"                 # UGUI | UIToolkit | Mixed
+folder_strategy: "feature-based"  # feature-based | type-based
+networking: "none"                # none | NGO | Mirror | Photon | Custom
+async_pattern: "Coroutines"       # Coroutines | Awaitable | UniTask
+use_ecs_dots: false
+
+# Architecture
+architecture_pattern: "so-first"  # so-first (ScriptableObject events/data) | di-first
+di_framework: "none"              # reflex | none (only relevant when di-first)
+
+# Packages (name: version)
+packages:
+  com.unity.inputsystem: "1.11.0"
+  com.unity.cinemachine: "2.10.0"
+  com.unity.textmeshpro: "3.0.9"
+
+# Third-Party
+third_party: []
+  # - name: "DOTween"
+  #   version: "1.2.745"
+  #   namespace: "DG.Tweening"
+
+# Game Feel Middleware
+feel_tools:
+  tweening: "none"          # DOTween | PrimeTween | LeanTween | none
+  feedback_system: "Custom" # Custom | none
+  audio: "Unity"            # FMOD | Wwise | Unity
+  camera: "Cinemachine"     # Custom | Cinemachine
+
+# Visual Packages (optional owned assets)
+visual_plugins:
+  has_shapes: false
+  has_true_shadow: false
+
+# MCP Integrations
+mcp:
+  unity_mcp: false
+  github_mcp: false
+  linear_mcp: false
+  notion_mcp: false
+
+# Documentation & Task Management
+task_management: "None"
+documentation: "Markdown"
+
+# Behavior
+ai_mode: "guided"
+prompt_logging: false
+
+# Rule Overrides (uncomment to enable)
+# rule_overrides:
+#   allow_ugui: true
+#   allow_coroutines_for_logic: true
