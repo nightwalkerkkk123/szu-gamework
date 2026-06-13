@@ -25,7 +25,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 256
-  groundCheckOffset: 0.55
-  groundCheckDistance: 0.1
+  groundCheckOffset: 0.78
+  groundCheckDistance: 0.15
   stumbleSpeedFactor: 0.4
   stumbleDuration: 0.8

@@ -23,14 +23,14 @@ namespace SugarRush.Editor
             SceneManager.SetActiveScene(scene);
 
             LoadAssets(out var glucoseConfig, out var skiingConfig, out var levelData,
-                out var insulin, out var pills, out var snowflake);
+                out var insulin, out var pills, out var snowflake, out var slipperyGround);
 
-            var player = CreatePlayer(glucoseConfig, skiingConfig);
+            var player = CreatePlayer(glucoseConfig, skiingConfig, slipperyGround);
             var inputGo = CreateInput();
             var input = inputGo.GetComponent<SugarRushInput>();
             CreateCamera(player.transform);
             CreateLighting();
-            CreateGround();
+            CreateGround(slipperyGround);
             CreateObstacles();
             CreateItems(insulin, pills, snowflake);
             CreateFinishLine();
@@ -44,7 +44,7 @@ namespace SugarRush.Editor
 
         private static void LoadAssets(out GlucoseConfig glucose, out SkiingConfig skiing,
             out LevelData level, out InsulinSprayEffect insulin, out HypoglycemicPillsEffect pills,
-            out HighSugarSnowflakeEffect snowflake)
+            out HighSugarSnowflakeEffect snowflake, out PhysicsMaterial2D slipperyGround)
         {
             glucose = AssetDatabase.LoadAssetAtPath<GlucoseConfig>("Assets/Data/Configs/GlucoseConfig.asset");
             skiing = AssetDatabase.LoadAssetAtPath<SkiingConfig>("Assets/Data/Configs/SkiingConfig.asset");
@@ -52,15 +52,17 @@ namespace SugarRush.Editor
             insulin = AssetDatabase.LoadAssetAtPath<InsulinSprayEffect>("Assets/Data/Items/InsulinSpray.asset");
             pills = AssetDatabase.LoadAssetAtPath<HypoglycemicPillsEffect>("Assets/Data/Items/HypoglycemicPills.asset");
             snowflake = AssetDatabase.LoadAssetAtPath<HighSugarSnowflakeEffect>("Assets/Data/Items/HighSugarSnowflake.asset");
+            slipperyGround = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>("Assets/Data/PhysicsMaterials/SlipperyGround.physicsMaterial2D");
         }
 
-        private static GameObject CreatePlayer(GlucoseConfig glucoseConfig, SkiingConfig skiingConfig)
+        private static GameObject CreatePlayer(GlucoseConfig glucoseConfig, SkiingConfig skiingConfig, PhysicsMaterial2D slipperyGround)
         {
             var go = new GameObject("Player");
             go.tag = "Player";
-            go.transform.position = new Vector3(0f, 2f, 0f);
+            go.transform.position = new Vector3(0f, 0.8f, 0f);
 
             var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
             sr.color = Color.cyan;
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
@@ -71,6 +73,7 @@ namespace SugarRush.Editor
 
             var col = go.AddComponent<BoxCollider2D>();
             col.size = new Vector2(0.8f, 1.6f);
+            col.sharedMaterial = slipperyGround;
 
             var glucose = go.AddComponent<GlucoseSystem>();
             SetField(glucose, "_config", glucoseConfig);
@@ -134,7 +137,7 @@ namespace SugarRush.Editor
             lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
         }
 
-        private static void CreateGround()
+        private static void CreateGround(PhysicsMaterial2D slipperyGround)
         {
             int groundLayer = LayerMask.NameToLayer("Ground");
             if (groundLayer < 0)
@@ -143,7 +146,7 @@ namespace SugarRush.Editor
             }
 
             var ground = new GameObject("Ground");
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 20; i++)
             {
                 float x = i * 12f;
                 float y = -0.5f + (i % 2) * 0.5f; // slight variation
@@ -155,9 +158,11 @@ namespace SugarRush.Editor
                 UnityEngine.Object.DestroyImmediate(platform.GetComponent<Collider>());
                 var col = platform.AddComponent<BoxCollider2D>();
                 col.size = new Vector2(1f, 1f);
+                col.sharedMaterial = slipperyGround;
                 platform.layer = groundLayer;
                 var renderer = platform.GetComponent<Renderer>();
-                renderer.sharedMaterial.color = new Color(0.9f, 0.95f, 1f);
+                renderer.material = new Material(renderer.sharedMaterial);
+                renderer.material.color = new Color(0.9f, 0.95f, 1f);
             }
         }
 
@@ -168,7 +173,7 @@ namespace SugarRush.Editor
             var rock = GameObject.CreatePrimitive(PrimitiveType.Cube);
             rock.name = "StumbleRock";
             rock.transform.SetParent(root.transform);
-            rock.transform.position = new Vector3(25f, 1f, 0f);
+            rock.transform.position = new Vector3(55f, 1f, 0f);
             rock.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
             UnityEngine.Object.DestroyImmediate(rock.GetComponent<Collider>());
             rock.AddComponent<BoxCollider2D>();
@@ -178,7 +183,7 @@ namespace SugarRush.Editor
             var tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             tree.name = "CrashTree";
             tree.transform.SetParent(root.transform);
-            tree.transform.position = new Vector3(45f, 1.5f, 0f);
+            tree.transform.position = new Vector3(115f, 1.5f, 0f);
             tree.transform.localScale = new Vector3(0.6f, 1.5f, 0.6f);
             UnityEngine.Object.DestroyImmediate(tree.GetComponent<Collider>());
             tree.AddComponent<BoxCollider2D>();
@@ -190,9 +195,9 @@ namespace SugarRush.Editor
         {
             var root = new GameObject("Items");
 
-            CreatePickup(root.transform, "InsulinPickup", new Vector3(35f, 2f, 0f), insulin, Color.blue);
-            CreatePickup(root.transform, "PillsPickup", new Vector3(55f, 2f, 0f), pills, Color.green);
-            CreatePickup(root.transform, "SnowflakePickup", new Vector3(75f, 2f, 0f), snowflake, Color.yellow);
+            CreatePickup(root.transform, "InsulinPickup", new Vector3(75f, 2f, 0f), insulin, Color.blue);
+            CreatePickup(root.transform, "PillsPickup", new Vector3(135f, 2f, 0f), pills, Color.green);
+            CreatePickup(root.transform, "SnowflakePickup", new Vector3(195f, 2f, 0f), snowflake, Color.yellow);
         }
 
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
@@ -208,14 +213,15 @@ namespace SugarRush.Editor
             var pickup = go.AddComponent<PickupItem>();
             SetField(pickup, "_itemEffect", effect);
             var renderer = go.GetComponent<Renderer>();
-            renderer.sharedMaterial.color = color;
+            renderer.material = new Material(renderer.sharedMaterial);
+            renderer.material.color = color;
         }
 
         private static void CreateFinishLine()
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "FinishLine";
-            go.transform.position = new Vector3(110f, 3f, 0f);
+            go.transform.position = new Vector3(230f, 3f, 0f);
             go.transform.localScale = new Vector3(1f, 4f, 1f);
             UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
             var trigger = go.AddComponent<BoxCollider2D>();
@@ -223,7 +229,8 @@ namespace SugarRush.Editor
             trigger.size = new Vector2(1f, 1f);
             go.AddComponent<FinishLine>();
             var renderer = go.GetComponent<Renderer>();
-            renderer.sharedMaterial.color = Color.magenta;
+            renderer.material = new Material(renderer.sharedMaterial);
+            renderer.material.color = Color.magenta;
         }
 
         private static void CreateGameFlow(SugarRushInput input, GameObject player, LevelData levelData)
@@ -235,6 +242,7 @@ namespace SugarRush.Editor
             SetField(flow, "_input", input);
             SetField(flow, "_playerController", player.GetComponent<SkiingController>());
             SetField(flow, "_glucoseSystem", player.GetComponent<GlucoseSystem>());
+            SetField(flow, "_introDuration", 0.1f);
 
             var levelManager = go.AddComponent<LevelManager>();
             SetField(levelManager, "_levelData", levelData);

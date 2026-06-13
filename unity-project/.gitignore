@@ -58,3 +58,6 @@ StreamingAssets/aa/
 # Claude / Agent 临时文件
 .claude_tmp/
 *.agent.log
+
+# === 运行时截图（测试验证用，不提交） ===
+[Aa]ssets/[Ss]creenshots/
