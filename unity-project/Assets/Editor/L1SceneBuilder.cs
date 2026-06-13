@@ -147,16 +147,26 @@ namespace SugarRush.Editor
                 groundLayer = 8;
             }
 
+            const float segmentLength = 12f;
+            const float slopeAngle = 15f;
+            float rad = slopeAngle * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(rad);
+            float sin = Mathf.Sin(rad);
+
             var ground = new GameObject("Ground");
             for (int i = 0; i < 20; i++)
             {
-                float x = i * 12f;
-                float y = -0.5f + (i % 2) * 0.5f; // slight variation
+                float distance = i * segmentLength;
+                float x = distance * cos;
+                float y = -distance * sin;
+
                 var platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 platform.name = $"Platform_{i}";
                 platform.transform.SetParent(ground.transform);
                 platform.transform.position = new Vector3(x, y, 0f);
-                platform.transform.localScale = new Vector3(12f, 1f, 1f);
+                platform.transform.localScale = new Vector3(segmentLength, 1f, 1f);
+                platform.transform.rotation = Quaternion.Euler(0f, 0f, -slopeAngle);
+
                 UnityEngine.Object.DestroyImmediate(platform.GetComponent<Collider>());
                 var col = platform.AddComponent<BoxCollider2D>();
                 col.size = new Vector2(1f, 1f);
@@ -175,7 +185,7 @@ namespace SugarRush.Editor
             var rock = GameObject.CreatePrimitive(PrimitiveType.Cube);
             rock.name = "StumbleRock";
             rock.transform.SetParent(root.transform);
-            rock.transform.position = new Vector3(55f, 1f, 0f);
+            rock.transform.position = new Vector3(55f, GetGroundY(55f) + 0.4f, 0f);
             rock.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
             UnityEngine.Object.DestroyImmediate(rock.GetComponent<Collider>());
             rock.AddComponent<BoxCollider2D>();
@@ -185,7 +195,7 @@ namespace SugarRush.Editor
             var tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             tree.name = "CrashTree";
             tree.transform.SetParent(root.transform);
-            tree.transform.position = new Vector3(115f, 1.5f, 0f);
+            tree.transform.position = new Vector3(115f, GetGroundY(115f) + 0.75f, 0f);
             tree.transform.localScale = new Vector3(0.6f, 1.5f, 0.6f);
             UnityEngine.Object.DestroyImmediate(tree.GetComponent<Collider>());
             tree.AddComponent<BoxCollider2D>();
@@ -196,7 +206,7 @@ namespace SugarRush.Editor
         private static void CreateHazardZone(GlucoseSystem glucoseSystem)
         {
             var go = new GameObject("HazardZone_ColdWind");
-            go.transform.position = new Vector3(160f, 2f, 0f);
+            go.transform.position = new Vector3(160f, GetGroundY(160f) + 4f, 0f);
             go.transform.localScale = new Vector3(20f, 8f, 1f);
 
             var col = go.AddComponent<BoxCollider2D>();
@@ -222,9 +232,9 @@ namespace SugarRush.Editor
         {
             var root = new GameObject("Items");
 
-            CreatePickup(root.transform, "InsulinPickup", new Vector3(75f, 2f, 0f), insulin, Color.blue);
-            CreatePickup(root.transform, "PillsPickup", new Vector3(135f, 2f, 0f), pills, Color.green);
-            CreatePickup(root.transform, "SnowflakePickup", new Vector3(195f, 2f, 0f), snowflake, Color.yellow);
+            CreatePickup(root.transform, "InsulinPickup", new Vector3(75f, GetGroundY(75f) + 1.5f, 0f), insulin, Color.blue);
+            CreatePickup(root.transform, "PillsPickup", new Vector3(135f, GetGroundY(135f) + 1.5f, 0f), pills, Color.green);
+            CreatePickup(root.transform, "SnowflakePickup", new Vector3(195f, GetGroundY(195f) + 1.5f, 0f), snowflake, Color.yellow);
         }
 
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
@@ -248,7 +258,7 @@ namespace SugarRush.Editor
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "FinishLine";
-            go.transform.position = new Vector3(230f, 3f, 0f);
+            go.transform.position = new Vector3(230f, GetGroundY(230f) + 2f, 0f);
             go.transform.localScale = new Vector3(1f, 4f, 1f);
             UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
             var trigger = go.AddComponent<BoxCollider2D>();
@@ -445,6 +455,12 @@ namespace SugarRush.Editor
             buttonTextRect.anchorMin = Vector2.zero;
             buttonTextRect.anchorMax = Vector2.one;
             buttonTextRect.sizeDelta = Vector2.zero;
+        }
+
+        private static float GetGroundY(float x)
+        {
+            const float slopeAngle = 15f;
+            return -x * Mathf.Tan(slopeAngle * Mathf.Deg2Rad);
         }
 
         private static void SetField(object target, string fieldName, object value)
