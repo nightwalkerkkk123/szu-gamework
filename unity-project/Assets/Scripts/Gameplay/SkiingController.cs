@@ -1,4 +1,6 @@
+using SugarRush.Core;
 using SugarRush.Foundation;
+using System;
 using UnityEngine;
 
 namespace SugarRush.Gameplay
@@ -14,9 +16,9 @@ namespace SugarRush.Gameplay
         [SerializeField] private SugarRushInput _input;
 
         private Rigidbody2D _rb;
-        private float _rollTimer;
-        private float _rollCooldownTimer;
-        private float _stumbleTimer;
+        private TimerHandle _rollTimer;
+        private TimerHandle _rollCooldownTimer;
+        private TimerHandle _stumbleTimer;
         private bool _isGrounded;
         private bool _isRolling;
         private bool _isStumbled;
@@ -25,6 +27,10 @@ namespace SugarRush.Gameplay
         public bool IsRolling => _isRolling;
         public bool IsStumbled => _isStumbled;
         public Vector2 Velocity => _rb.velocity;
+
+        public event Action<bool> OnGroundedChanged;
+        public event Action<bool> OnRollingChanged;
+        public event Action<bool> OnStumbledChanged;
 
         private void Awake()
         {
@@ -53,6 +59,25 @@ namespace SugarRush.Gameplay
                 _input.OnJumpPressed += TryJump;
                 _input.OnRollPressed += TryRoll;
             }
+
+            SetupTimers();
+        }
+
+        private void OnEnable()
+        {
+            TimerService.Instance.Register(_rollTimer);
+            TimerService.Instance.Register(_rollCooldownTimer);
+            TimerService.Instance.Register(_stumbleTimer);
+        }
+
+        private void OnDisable()
+        {
+            if (TimerService.Instance != null)
+            {
+                TimerService.Instance.Unregister(_rollTimer);
+                TimerService.Instance.Unregister(_rollCooldownTimer);
+                TimerService.Instance.Unregister(_stumbleTimer);
+            }
         }
 
         private void OnDestroy()
@@ -64,31 +89,25 @@ namespace SugarRush.Gameplay
             }
         }
 
-        private void Update()
+        private void SetupTimers()
         {
-            float dt = Time.deltaTime;
+            _rollTimer = new TimerHandle(0f);
+            _rollTimer.OnExpired += EndRoll;
 
-            if (_rollTimer > 0f)
-            {
-                _rollTimer -= dt;
-                if (_rollTimer <= 0f) EndRoll();
-            }
+            _rollCooldownTimer = new TimerHandle(0f);
 
-            if (_rollCooldownTimer > 0f)
-            {
-                _rollCooldownTimer -= dt;
-            }
-
-            if (_stumbleTimer > 0f)
-            {
-                _stumbleTimer -= dt;
-                if (_stumbleTimer <= 0f) EndStumble();
-            }
+            _stumbleTimer = new TimerHandle(0f);
+            _stumbleTimer.OnExpired += EndStumble;
         }
 
         private void FixedUpdate()
         {
+            bool wasGrounded = _isGrounded;
             _isGrounded = CheckGrounded();
+            if (wasGrounded != _isGrounded)
+            {
+                OnGroundedChanged?.Invoke(_isGrounded);
+            }
 
             if (_isStumbled) return;
 
@@ -132,19 +151,20 @@ namespace SugarRush.Gameplay
         {
             if (_isGrounded) return;
 
-            // Minimal air steer placeholder; can be expanded with directional input.
-            Vector2 vel = _rb.velocity;
-            vel.x = Mathf.Lerp(vel.x, _config.maxSpeed * controlMod, _config.airControl * Time.fixedDeltaTime);
-            _rb.velocity = vel;
+            // Steer toward target horizontal speed using force rather than direct velocity assignment.
+            float desiredX = _config.maxSpeed * controlMod;
+            float deltaX = desiredX - _rb.velocity.x;
+            float forceX = deltaX * _config.airControl * _rb.mass;
+            _rb.AddForce(new Vector2(forceX, 0f), ForceMode2D.Force);
         }
 
         private void ApplyFriction()
         {
             if (!_isGrounded) return;
 
-            Vector2 vel = _rb.velocity;
-            vel.x = Mathf.MoveTowards(vel.x, 0f, _config.groundFriction * Time.fixedDeltaTime);
-            _rb.velocity = vel;
+            // Apply horizontal drag as force instead of directly modifying velocity.
+            float frictionForce = -_rb.velocity.x * _config.groundFriction * _rb.mass;
+            _rb.AddForce(new Vector2(frictionForce, 0f), ForceMode2D.Force);
         }
 
         private bool CheckGrounded()
@@ -165,11 +185,12 @@ namespace SugarRush.Gameplay
 
         private void TryRoll()
         {
-            if (!enabled || _isStumbled || _isRolling || _rollCooldownTimer > 0f) return;
+            if (!enabled || _isStumbled || _isRolling || _rollCooldownTimer.IsRunning) return;
 
             _isRolling = true;
-            _rollTimer = _config.rollDuration;
-            _rollCooldownTimer = _config.rollDuration + _config.rollCooldown;
+            OnRollingChanged?.Invoke(true);
+            _rollTimer.Reset(_config.rollDuration);
+            _rollCooldownTimer.Reset(_config.rollDuration + _config.rollCooldown);
 
             // Shrink hitbox placeholder: could animate scale or disable main collider and enable roll collider.
             Debug.Log("[SkiingController] Roll started.", this);
@@ -178,6 +199,7 @@ namespace SugarRush.Gameplay
         private void EndRoll()
         {
             _isRolling = false;
+            OnRollingChanged?.Invoke(false);
             Debug.Log("[SkiingController] Roll ended.", this);
         }
 
@@ -186,7 +208,8 @@ namespace SugarRush.Gameplay
             if (_isRolling) return; // invulnerable
 
             _isStumbled = true;
-            _stumbleTimer = _config.stumbleDuration;
+            OnStumbledChanged?.Invoke(true);
+            _stumbleTimer.Reset(_config.stumbleDuration);
 
             Vector2 vel = _rb.velocity;
             vel.x *= _config.stumbleSpeedFactor;
@@ -207,6 +230,7 @@ namespace SugarRush.Gameplay
         private void EndStumble()
         {
             _isStumbled = false;
+            OnStumbledChanged?.Invoke(false);
             Debug.Log("[SkiingController] Stumble ended.", this);
         }
 

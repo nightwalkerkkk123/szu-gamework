@@ -7,7 +7,7 @@ namespace SugarRush.Foundation
 {
     /// <summary>
     /// Central glucose (blood sugar) simulation. 
-/// Translates the medical mechanic into a survival bar with speed/control/vision modifiers.
+    /// Translates the medical mechanic into a survival bar with speed/control/vision modifiers.
     /// </summary>
     public class GlucoseSystem : MonoBehaviour
     {
@@ -52,6 +52,24 @@ namespace SugarRush.Foundation
             UpdateZone(true);
         }
 
+        private void OnEnable()
+        {
+            foreach (var buff in _activeBuffs)
+            {
+                TimerService.Instance.Register(buff.Timer);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (TimerService.Instance == null) return;
+
+            foreach (var buff in _activeBuffs)
+            {
+                TimerService.Instance.Unregister(buff.Timer);
+            }
+        }
+
         private void Update()
         {
             float deltaTime = Time.deltaTime;
@@ -66,24 +84,26 @@ namespace SugarRush.Foundation
             }
 
             // Tick timed buffs
+            bool anyBuffChanged = false;
             for (int i = _activeBuffs.Count - 1; i >= 0; i--)
             {
                 var buff = _activeBuffs[i];
-                if (buff.IsExpired)
+                if (buff.Timer.IsExpired)
                 {
+                    TimerService.Instance.Unregister(buff.Timer);
                     _activeBuffs.RemoveAt(i);
+                    anyBuffChanged = true;
                     continue;
                 }
 
                 if (buff.DeltaPerSecond != 0f)
                 {
                     ApplyDelta(buff.DeltaPerSecond * deltaTime, suppressEvents: true);
+                    anyBuffChanged = true;
                 }
-
-                buff.Tick(deltaTime);
             }
 
-            if (_activeBuffs.Count > 0)
+            if (anyBuffChanged)
             {
                 RaiseValueChanged();
             }
@@ -119,7 +139,12 @@ namespace SugarRush.Foundation
                 return;
             }
 
-            _activeBuffs.Add(new GlucoseBuff(deltaPerSecond, duration));
+            var buff = new GlucoseBuff(deltaPerSecond, duration);
+            if (enabled && gameObject.activeInHierarchy)
+            {
+                TimerService.Instance.Register(buff.Timer);
+            }
+            _activeBuffs.Add(buff);
         }
 
         /// <summary>
@@ -199,18 +224,12 @@ namespace SugarRush.Foundation
         private class GlucoseBuff
         {
             public float DeltaPerSecond { get; }
-            public float RemainingTime { get; private set; }
-            public bool IsExpired => RemainingTime <= 0f;
+            public TimerHandle Timer { get; }
 
             public GlucoseBuff(float deltaPerSecond, float duration)
             {
                 DeltaPerSecond = deltaPerSecond;
-                RemainingTime = duration;
-            }
-
-            public void Tick(float deltaTime)
-            {
-                RemainingTime -= deltaTime;
+                Timer = new TimerHandle(duration);
             }
         }
     }

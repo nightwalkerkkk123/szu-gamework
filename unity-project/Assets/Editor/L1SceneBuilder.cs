@@ -87,6 +87,8 @@ namespace SugarRush.Editor
             SetField(skiing, "_config", skiingConfig);
             SetField(skiing, "_glucoseSystem", glucose);
 
+            CreateSkiTrail(go.transform, skiing, glucose);
+
             var inventory = go.AddComponent<PlayerInventory>();
             SetField(inventory, "_glucoseSystem", glucose);
             SetField(inventory, "_skiingController", skiing);
@@ -277,9 +279,28 @@ namespace SugarRush.Editor
             canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
             canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
+            CreateGlucoseVisionOverlay(canvasGo.transform, player.GetComponent<GlucoseSystem>());
             CreateGlucoseBar(canvasGo.transform, player.GetComponent<GlucoseSystem>());
             CreateHUD(canvasGo.transform, player, levelManager);
             CreateResultPanel(canvasGo.transform);
+        }
+
+        private static void CreateGlucoseVisionOverlay(Transform canvas, GlucoseSystem glucoseSystem)
+        {
+            var go = new GameObject("GlucoseVisionOverlay");
+            go.transform.SetParent(canvas, false);
+
+            var image = go.AddComponent<UnityEngine.UI.Image>();
+            image.color = new Color(0f, 0f, 0f, 0f);
+            image.raycastTarget = false;
+
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.sizeDelta = Vector2.zero;
+
+            var effect = go.AddComponent<GlucoseVisionEffect>();
+            SetField(effect, "_glucoseSystem", glucoseSystem);
         }
 
         private static void CreateGlucoseBar(Transform canvas, GlucoseSystem glucoseSystem)
@@ -453,6 +474,27 @@ namespace SugarRush.Editor
             sr.color = new Color(0.2f, 0.2f, 0.2f);
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.12f, 1.2f);
+        }
+
+        private static void CreateSkiTrail(Transform parent, SkiingController skiingController, GlucoseSystem glucoseSystem)
+        {
+            var go = new GameObject("SkiTrail");
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = new Vector3(0f, -0.7f, 0.1f);
+
+            var trail = go.AddComponent<TrailRenderer>();
+            trail.material = new Material(Shader.Find("Sprites/Default"));
+            trail.time = 0.4f;
+            trail.widthMultiplier = 0.25f;
+            trail.minVertexDistance = 0.05f;
+            trail.startColor = new Color(0.85f, 0.95f, 1f, 0.7f);
+            trail.endColor = new Color(0.85f, 0.95f, 1f, 0f);
+            trail.sortingLayerID = parent.GetComponentInChildren<SpriteRenderer>()?.sortingLayerID ?? 0;
+            trail.sortingOrder = -1;
+
+            var skiTrail = go.AddComponent<SkiTrail>();
+            SetField(skiTrail, "_skiingController", skiingController);
+            SetField(skiTrail, "_glucoseSystem", glucoseSystem);
         }
 
         private static GameObject CreateSpriteObject(Transform parent, string name, Vector3 position, Vector2 size, Color color)
