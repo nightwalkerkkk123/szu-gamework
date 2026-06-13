@@ -21,6 +21,12 @@ namespace SugarRush.Gameplay
         [SerializeField] private float _rollTime = 0.15f;
         [SerializeField] private float _rollWidthMultiplier = 0.5f;
 
+        [Header("Speed/Glucose Boost")]
+        [SerializeField] private float _speedForMaxTrail = 18f;
+        [SerializeField] private float _maxWidthBoost = 0.35f;
+        [SerializeField] private float _maxTimeBoost = 0.3f;
+        [SerializeField] private float _glucoseBoostLerpSpeed = 4f;
+
         [Header("Colors")]
         [SerializeField] private Color _normalColor = new Color(0.85f, 0.95f, 1f, 0.7f);
         [SerializeField] private Color _lowCrisisColor = new Color(0.3f, 0.5f, 1f, 0.8f);
@@ -79,10 +85,36 @@ namespace SugarRush.Gameplay
             }
         }
 
+        private float _currentBoost;
+
         private void Update()
         {
             _trail.startColor = Color.Lerp(_trail.startColor, _targetColor, Time.deltaTime * _colorLerpSpeed);
             _trail.endColor = new Color(_trail.startColor.r, _trail.startColor.g, _trail.startColor.b, 0f);
+
+            UpdateSpeedGlucoseBoost();
+        }
+
+        private void UpdateSpeedGlucoseBoost()
+        {
+            float speed = _skiingController != null ? _skiingController.Velocity.magnitude : 0f;
+            float speedBoost = Mathf.Lerp(0f, 1f, Mathf.Clamp01(speed / _speedForMaxTrail));
+
+            float glucoseBoost = 0f;
+            if (_glucoseSystem != null)
+            {
+                var zone = _glucoseSystem.CurrentZone;
+                if (zone == GlucoseZone.HighCrisis || zone == GlucoseZone.HighWarning)
+                {
+                    glucoseBoost = 1f;
+                }
+            }
+
+            float targetBoost = Mathf.Max(speedBoost, glucoseBoost);
+            _currentBoost = Mathf.Lerp(_currentBoost, targetBoost, Time.deltaTime * _glucoseBoostLerpSpeed);
+
+            // Width/time are updated in UpdateTrailAppearance; we re-apply each frame to account for boost.
+            UpdateTrailAppearance();
         }
 
         private void HandleGroundedChanged(bool isGrounded)
@@ -134,24 +166,27 @@ namespace SugarRush.Gameplay
                 return;
             }
 
+            float widthBoost = _currentBoost * _maxWidthBoost;
+            float timeBoost = _currentBoost * _maxTimeBoost;
+
             if (_skiingController.IsRolling)
             {
-                _trail.time = _rollTime;
-                _trail.widthMultiplier = _rollWidthMultiplier;
+                _trail.time = _rollTime + timeBoost * 0.5f;
+                _trail.widthMultiplier = _rollWidthMultiplier + widthBoost;
                 _trail.emitting = true;
                 return;
             }
 
             if (_skiingController.IsGrounded)
             {
-                _trail.time = _groundedTime;
-                _trail.widthMultiplier = _groundedWidthMultiplier;
+                _trail.time = _groundedTime + timeBoost;
+                _trail.widthMultiplier = _groundedWidthMultiplier + widthBoost;
                 _trail.emitting = true;
             }
             else
             {
-                _trail.time = _airTime;
-                _trail.widthMultiplier = _airWidthMultiplier;
+                _trail.time = _airTime + timeBoost * 0.3f;
+                _trail.widthMultiplier = _airWidthMultiplier + widthBoost * 0.5f;
                 _trail.emitting = true;
             }
         }

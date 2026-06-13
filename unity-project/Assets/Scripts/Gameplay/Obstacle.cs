@@ -19,6 +19,18 @@ namespace SugarRush.Gameplay
             {
                 if (controller.IsRolling) return;
 
+                var contact = collision.GetContact(0);
+
+                if (collision.collider.TryGetComponent<SimpleParticleSpawner>(out var spawner))
+                {
+                    spawner.SpawnHitParticles(contact.point);
+                }
+
+                if (collision.collider.TryGetComponent<PlayerVisuals>(out var visuals))
+                {
+                    visuals.TriggerHurtFlash();
+                }
+
                 switch (_type)
                 {
                     case ObstacleType.Stumble:

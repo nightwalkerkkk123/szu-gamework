@@ -6,6 +6,14 @@ using UnityEngine;
 
 namespace SugarRush.GameFlow
 {
+    public enum SegmentTerrainType
+    {
+        Flat,
+        Slope,
+        GapStart,
+        GapEnd
+    }
+
     /// <summary>
     /// Data-driven definition of a single level segment.
     /// Used by the scene builder to generate ground, obstacles, pickups and hazards.
@@ -23,6 +31,18 @@ namespace SugarRush.GameFlow
 
         [Tooltip("Ground segment piece length. Smaller values = more platform pieces.")]
         [field: SerializeField] public float GroundPieceLength { get; private set; } = 12f;
+
+        [Tooltip("If true, leaves a gap in the middle of the segment that the player must jump over.")]
+        [field: SerializeField] public bool HasGap { get; private set; }
+
+        [Tooltip("Where the gap starts, as a ratio of segment length (0-1).")]
+        [field: SerializeField, Range(0f, 1f)] public float GapStartRatio { get; private set; } = 0.4f;
+
+        [Tooltip("Where the gap ends, as a ratio of segment length (0-1).")]
+        [field: SerializeField, Range(0f, 1f)] public float GapEndRatio { get; private set; } = 0.6f;
+
+        [Tooltip("How far down the gap floor is from the ground.")]
+        [field: SerializeField] public float GapDepth { get; private set; } = 8f;
 
         [field: SerializeField] public List<SegmentObstacle> Obstacles { get; private set; } = new();
         [field: SerializeField] public List<SegmentPickup> Pickups { get; private set; } = new();

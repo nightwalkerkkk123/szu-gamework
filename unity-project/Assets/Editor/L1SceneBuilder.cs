@@ -34,6 +34,7 @@ namespace SugarRush.Editor
             CreateCamera(player.transform);
             CreateLighting();
             CreateLevelFromSegments(segments, slipperyGround, player.GetComponent<GlucoseSystem>());
+            CreateGapDeathZone();
             var flow = CreateGameFlow(input, player, levelData);
             CreateUI(player, flow.GetComponent<LevelManager>());
 
@@ -70,27 +71,47 @@ namespace SugarRush.Editor
         private static List<LevelSegmentData> EnsureSegments(LevelData level,
             InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake)
         {
-            if (level.Segments != null && level.Segments.Count > 0)
-            {
-                Debug.Log($"[L1SceneBuilder] Using {level.Segments.Count} segments from {level.LevelId}.");
-                return level.Segments;
-            }
-
-            Debug.Log("[L1SceneBuilder] No segments assigned; creating default L1 segments.");
             string folder = "Assets/Data/Segments";
             EnsureFolder(folder);
 
-            var segment1 = CreateOrLoadSegment($"{folder}/L1_Segment_Tutorial.asset", "L1_Tutorial", 60f, 12f,
-                new SegmentObstacle { DistanceAlongSegment = 40f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) },
-                new SegmentPickup { DistanceAlongSegment = 60f, HeightOffset = 1.5f, ItemEffect = insulin, Color = Color.blue });
+            // Always recreate L1 segments so iteration is consistent.
+            DeleteSegmentAssets(folder);
 
-            var segment2 = CreateOrLoadSegment($"{folder}/L1_Segment_Rocks.asset", "L1_Rocks", 60f, 12f,
-                new SegmentObstacle { DistanceAlongSegment = 30f, HeightOffset = 0.6f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.5f, 0.8f), Color = new Color(0.45f, 0.3f, 0.2f) },
-                new SegmentPickup { DistanceAlongSegment = 50f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green });
+            var segment1 = CreateSegmentAsset($"{folder}/L1_Segment_Tutorial.asset", "L1_Tutorial", 60f, 12f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 35f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) }
+                },
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 55f, HeightOffset = 1.5f, ItemEffect = insulin, Color = Color.blue }
+                });
 
-            var segment3 = CreateOrLoadSegment($"{folder}/L1_Segment_ColdWind.asset", "L1_ColdWind", 60f, 12f,
-                new SegmentHazard { DistanceAlongSegment = 10f, CenterHeightOffset = 4f, Size = new Vector2(20f, 8f), DeltaPerSecond = -5f },
-                new SegmentPickup { DistanceAlongSegment = 30f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow });
+            var segment2 = CreateSegmentAsset($"{folder}/L1_Segment_Rocks.asset", "L1_Rocks", 60f, 12f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 15f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) },
+                    new SegmentObstacle { DistanceAlongSegment = 45f, HeightOffset = 1.3f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.6f, 0.4f), Color = new Color(0.45f, 0.3f, 0.2f) }
+                },
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 50f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green }
+                },
+                hasGap: true, gapStart: 0.65f, gapEnd: 0.85f);
+
+            var segment3 = CreateSegmentAsset($"{folder}/L1_Segment_ColdWind.asset", "L1_ColdWind", 60f, 12f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 45f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) }
+                },
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 30f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
+                },
+                hazards: new SegmentHazard[]
+                {
+                    new SegmentHazard { DistanceAlongSegment = 10f, CenterHeightOffset = 4f, Size = new Vector2(20f, 8f), DeltaPerSecond = -5f }
+                });
 
             var segments = new List<LevelSegmentData> { segment1, segment2, segment3 };
             level.SetSegments(segments);
@@ -100,46 +121,38 @@ namespace SugarRush.Editor
             return segments;
         }
 
-        private static LevelSegmentData CreateOrLoadSegment(string path, string id, float length, float slopeAngle,
-            SegmentObstacle obstacle, SegmentPickup pickup)
+        private static void DeleteSegmentAssets(string folder)
         {
-            var existing = AssetDatabase.LoadAssetAtPath<LevelSegmentData>(path);
-            if (existing != null) return existing;
-
-            var segment = ScriptableObject.CreateInstance<LevelSegmentData>();
-            ApplySegmentBaseProperties(segment, id, length, slopeAngle);
-
-            if (obstacle != null) segment.Obstacles.Add(obstacle);
-            if (pickup != null) segment.Pickups.Add(pickup);
-
-            AssetDatabase.CreateAsset(segment, path);
-            return segment;
+            var guids = AssetDatabase.FindAssets("t:LevelSegmentData", new[] { folder });
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                AssetDatabase.DeleteAsset(path);
+            }
         }
 
-        private static LevelSegmentData CreateOrLoadSegment(string path, string id, float length, float slopeAngle,
-            SegmentHazard hazard, SegmentPickup pickup)
+        private static LevelSegmentData CreateSegmentAsset(string path, string id, float length, float slopeAngle,
+            SegmentObstacle[] obstacles = null, SegmentPickup[] pickups = null, SegmentHazard[] hazards = null,
+            bool hasGap = false, float gapStart = 0f, float gapEnd = 0f)
         {
-            var existing = AssetDatabase.LoadAssetAtPath<LevelSegmentData>(path);
-            if (existing != null) return existing;
-
             var segment = ScriptableObject.CreateInstance<LevelSegmentData>();
-            ApplySegmentBaseProperties(segment, id, length, slopeAngle);
-
-            if (hazard != null) segment.Hazards.Add(hazard);
-            if (pickup != null) segment.Pickups.Add(pickup);
-
-            AssetDatabase.CreateAsset(segment, path);
-            return segment;
-        }
-
-        private static void ApplySegmentBaseProperties(LevelSegmentData segment, string id, float length, float slopeAngle)
-        {
             var so = new SerializedObject(segment);
             so.FindProperty("<SegmentId>k__BackingField").stringValue = id;
             so.FindProperty("<Length>k__BackingField").floatValue = length;
             so.FindProperty("<SlopeAngle>k__BackingField").floatValue = slopeAngle;
             so.FindProperty("<GroundPieceLength>k__BackingField").floatValue = 12f;
+            so.FindProperty("<HasGap>k__BackingField").boolValue = hasGap;
+            so.FindProperty("<GapStartRatio>k__BackingField").floatValue = gapStart;
+            so.FindProperty("<GapEndRatio>k__BackingField").floatValue = gapEnd;
+            so.FindProperty("<GapDepth>k__BackingField").floatValue = 8f;
             so.ApplyModifiedProperties();
+
+            if (obstacles != null) segment.Obstacles.AddRange(obstacles);
+            if (pickups != null) segment.Pickups.AddRange(pickups);
+            if (hazards != null) segment.Hazards.AddRange(hazards);
+
+            AssetDatabase.CreateAsset(segment, path);
+            return segment;
         }
 
         private static void EnsureFolder(string path)
@@ -181,8 +194,17 @@ namespace SugarRush.Editor
             var skiing = go.AddComponent<SkiingController>();
             SetField(skiing, "_config", skiingConfig);
             SetField(skiing, "_glucoseSystem", glucose);
+            SetField(skiing, "_hitbox", col);
 
             CreateSkiTrail(go.transform, skiing, glucose);
+
+            var visuals = go.AddComponent<PlayerVisuals>();
+            SetField(visuals, "_bodyRenderer", sr);
+            SetField(visuals, "_skiingController", skiing);
+            SetField(visuals, "_glucoseSystem", glucose);
+
+            var particles = go.AddComponent<SimpleParticleSpawner>();
+            SetField(particles, "_particleSprite", sr.sprite);
 
             var inventory = go.AddComponent<PlayerInventory>();
             SetField(inventory, "_glucoseSystem", glucose);
@@ -227,6 +249,10 @@ namespace SugarRush.Editor
             transposer.m_ScreenX = 0.35f;
             transposer.m_DeadZoneWidth = 0.1f;
             transposer.m_DeadZoneHeight = 0.15f;
+
+            var camEffects = vcamGo.AddComponent<CameraEffects>();
+            SetField(camEffects, "_skiingController", target.GetComponent<SkiingController>());
+            SetField(camEffects, "_glucoseSystem", target.GetComponent<GlucoseSystem>());
         }
 
         private static void CreateLighting()
@@ -279,6 +305,13 @@ namespace SugarRush.Editor
                 for (int i = 0; i < pieces; i++)
                 {
                     float tCenter = (i + 0.5f) / pieces;
+
+                    // Skip ground pieces inside the gap.
+                    if (segment.HasGap && tCenter >= segment.GapStartRatio && tCenter <= segment.GapEndRatio)
+                    {
+                        continue;
+                    }
+
                     float centerDistance = tCenter * segment.Length;
                     float x = currentX + centerDistance * cos;
                     float y = currentY - centerDistance * sin;
@@ -298,6 +331,23 @@ namespace SugarRush.Editor
                     var renderer = platform.GetComponent<Renderer>();
                     renderer.sharedMaterial = new Material(renderer.sharedMaterial);
                     renderer.sharedMaterial.color = new Color(0.9f, 0.95f, 1f);
+                }
+
+                // Visual dark pit for gap.
+                if (segment.HasGap)
+                {
+                    float gapStartDist = segment.GapStartRatio * segment.Length;
+                    float gapEndDist = segment.GapEndRatio * segment.Length;
+                    float gapMidDist = (gapStartDist + gapEndDist) * 0.5f;
+                    float gapX = currentX + gapMidDist * cos;
+                    float gapY = currentY - gapMidDist * sin;
+                    float gapWorldWidth = (gapEndDist - gapStartDist) * cos;
+
+                    var pit = CreateSpriteObject(groundRoot.transform, "GapPit",
+                        new Vector3(gapX, gapY - segment.GapDepth * 0.5f - 1f, 0.1f),
+                        new Vector2(gapWorldWidth + 2f, segment.GapDepth),
+                        new Color(0.1f, 0.12f, 0.15f, 1f));
+                    pit.transform.rotation = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
                 }
 
                 // Place obstacles
@@ -368,6 +418,18 @@ namespace SugarRush.Editor
             SetField(hazard, "_deltaPerSecond", deltaPerSecond);
         }
 
+        private static void CreateGapDeathZone()
+        {
+            var go = new GameObject("GapDeathZone");
+            go.transform.position = new Vector3(0f, -20f, 0f);
+
+            var col = go.AddComponent<BoxCollider2D>();
+            col.isTrigger = true;
+            col.size = new Vector2(1000f, 10f);
+
+            go.AddComponent<GapDeathZone>();
+        }
+
         private static GameObject CreateGameFlow(SugarRushInput input, GameObject player, LevelData levelData)
         {
             var go = new GameObject("GameFlow");
@@ -418,8 +480,19 @@ namespace SugarRush.Editor
             rect.anchorMax = Vector2.one;
             rect.sizeDelta = Vector2.zero;
 
+            var frostGo = new GameObject("FrostOverlay");
+            frostGo.transform.SetParent(go.transform, false);
+            var frostImage = frostGo.AddComponent<UnityEngine.UI.Image>();
+            frostImage.color = new Color(1f, 1f, 1f, 0f);
+            frostImage.raycastTarget = false;
+            var frostRect = frostGo.GetComponent<RectTransform>();
+            frostRect.anchorMin = Vector2.zero;
+            frostRect.anchorMax = Vector2.one;
+            frostRect.sizeDelta = Vector2.zero;
+
             var effect = go.AddComponent<GlucoseVisionEffect>();
             SetField(effect, "_glucoseSystem", glucoseSystem);
+            SetField(effect, "_frostImage", frostImage);
         }
 
         private static void CreateGlucoseBar(Transform canvas, GlucoseSystem glucoseSystem)

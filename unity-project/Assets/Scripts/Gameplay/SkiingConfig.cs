@@ -31,6 +31,16 @@ namespace SugarRush.Gameplay
         [Tooltip("Horizontal air control multiplier (0-1).")]
         public float airControl = 0.4f;
 
+        [Header("Jump Feel")]
+        [Tooltip("Time after leaving ground where jump still works.")]
+        public float coyoteTime = 0.1f;
+
+        [Tooltip("Time window to buffer a jump before landing.")]
+        public float jumpBufferTime = 0.1f;
+
+        [Tooltip("Upward bounce applied on landing to soften impact.")]
+        public float landingBounce = 2f;
+
         [Header("Roll")]
         [Tooltip("Duration of the roll state (invulnerable to obstacles).")]
         public float rollDuration = 0.6f;
@@ -39,7 +49,14 @@ namespace SugarRush.Gameplay
         public float rollCooldown = 0.3f;
 
         [Tooltip("Forward speed boost during roll.")]
-        public float rollSpeedBoost = 4f;
+        public float rollSpeedBoost = 6f;
+
+        [Tooltip("Instant horizontal kick when roll starts.")]
+        public float rollInitialBoost = 3f;
+
+        [Tooltip("Hitbox height multiplier while rolling.")]
+        [Range(0.1f, 1f)]
+        public float rollHitboxHeightScale = 0.5f;
 
         [Header("Ground Check")]
         [Tooltip("Layer mask for ground detection.")]
