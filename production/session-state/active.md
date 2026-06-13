@@ -45,12 +45,13 @@
 - 修复审阅发现的关键问题：
   - `OnCrisisFailed` 事件在 Glucose System GDD 中显式定义
   - 高糖雪花速度加成明确为独立临时 bonus（与 Glucose modifier 相乘）
+- 更新 `Packages/manifest.json`：新增 Input System 1.11.0、Cinemachine 2.10.0；升级 TextMeshPro 3.0.9
 
 ---
 
 ## In Progress
 
-- **核心循环原型开发准备** — 设计审阅完成，等待进入 Unity 实现
+- **核心循环原型代码实现** — manifest 已更新，等待 Unity Editor 切回后自动解析包
 
 ---
 
@@ -69,6 +70,7 @@
 - 新增 `docs/ProjectConfig.yaml`
 - `ai_mode` 设为 `guided`
 - 选定 `Built-in` 渲染管线、`UGUI`、`Cinemachine`、`Input System`
+- `Packages/manifest.json` 更新：新增 Input System / Cinemachine，升级 TextMeshPro
 
 ---
 
@@ -77,6 +79,7 @@
 ```
 // TODO: W2 核心循环原型 — 实现 SkiingController + GlucoseSystem 占位验证
 // ASSET: 糖糖 placeholder sprite、基础雪山 tileset、跳跃/翻滚动画占位
+// BLOCKER: Unity Editor 已打开，manifest 修改后需切回 Unity 让 Package Manager 自动解析
 ```
 
 ---
@@ -88,5 +91,5 @@
 - 已完成 Core 层：Skiing Controller、Obstacle & Hazard
 - 已完成 Feature 层：Item & Pickup System
 - 核心循环原型最小 GDD 集合已完成：Glucose / Input / Skiing / Obstacle / Item / GameFlow / LevelData
-- 接下来可进入 Unity 实现：先搭场景占位，验证滑行手感与血糖机制转译
+- 当前进入 Unity 实现阶段：manifest 已更新，等待包解析后开始写核心系统脚本
 - 后续可边做边补：HUD/Camera、Scoring、Result、Menus、Environmental Zones
