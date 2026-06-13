@@ -78,8 +78,13 @@ namespace SugarRush.Foundation
         private System.Collections.IEnumerator RestartLevelAfterFrame()
         {
             yield return null;
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+
+            // Resume time before reloading so the load and subsequent gameplay run normally.
+            Time.timeScale = 1f;
+
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Debug.Log($"[ResultPanel] Restarting scene: {sceneName}");
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
     }
 }

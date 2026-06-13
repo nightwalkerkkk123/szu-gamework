@@ -38,8 +38,20 @@ namespace SugarRush.Editor
             CreateUI(player, flow.GetComponent<LevelManager>());
 
             EditorSceneManager.SaveScene(scene, scenePath);
+            EnsureSceneInBuildSettings(scenePath);
             AssetDatabase.Refresh();
             Debug.Log($"[L1SceneBuilder] Scene saved to {scenePath}");
+        }
+
+        private static void EnsureSceneInBuildSettings(string scenePath)
+        {
+            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            bool alreadyIncluded = scenes.Exists(s => s.path == scenePath);
+            if (alreadyIncluded) return;
+
+            scenes.Add(new EditorBuildSettingsScene(scenePath, enabled: true));
+            EditorBuildSettings.scenes = scenes.ToArray();
+            Debug.Log($"[L1SceneBuilder] Added {scenePath} to Build Settings.");
         }
 
         private static void LoadAssets(out GlucoseConfig glucose, out SkiingConfig skiing,
