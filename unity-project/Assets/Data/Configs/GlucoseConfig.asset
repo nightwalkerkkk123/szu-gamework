@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GlucoseConfig
   m_EditorClassIdentifier: 
   startValue: 60
-  passiveDecayPerSecond: 1.5
+  passiveDecayPerSecond: 1.2
   lowCrisisThreshold: 10
   lowWarningThreshold: 30
   highWarningThreshold: 75

@@ -69,6 +69,9 @@ namespace SugarRush.Editor
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
 
+            CreateSki(sr.transform, new Vector2(-0.25f, -0.7f));
+            CreateSki(sr.transform, new Vector2(0.25f, -0.7f));
+
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 2.5f;
             rb.freezeRotation = true;
@@ -148,7 +151,7 @@ namespace SugarRush.Editor
             }
 
             const float segmentLength = 12f;
-            const float slopeAngle = 15f;
+            const float slopeAngle = 12f;
             float rad = slopeAngle * Mathf.Deg2Rad;
             float cos = Mathf.Cos(rad);
             float sin = Mathf.Sin(rad);
@@ -182,25 +185,19 @@ namespace SugarRush.Editor
         {
             var root = new GameObject("Obstacles");
 
-            var rock = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            rock.name = "StumbleRock";
-            rock.transform.SetParent(root.transform);
-            rock.transform.position = new Vector3(40f, GetGroundY(40f) + 0.4f, 0f);
-            rock.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-            UnityEngine.Object.DestroyImmediate(rock.GetComponent<Collider>());
+            var rock = CreateSpriteObject(root.transform, "StumbleRock",
+                new Vector3(40f, GetGroundY(40f) + 0.4f, 0f),
+                new Vector2(0.8f, 0.8f), new Color(0.55f, 0.4f, 0.35f));
             rock.AddComponent<BoxCollider2D>();
             var obstacle = rock.AddComponent<Obstacle>();
             SetField(obstacle, "_type", Obstacle.ObstacleType.Stumble);
 
-            var tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            tree.name = "LowBranch";
-            tree.transform.SetParent(root.transform);
-            tree.transform.position = new Vector3(90f, GetGroundY(90f) + 0.6f, 0f);
-            tree.transform.localScale = new Vector3(0.5f, 0.8f, 0.5f);
-            UnityEngine.Object.DestroyImmediate(tree.GetComponent<Collider>());
-            tree.AddComponent<BoxCollider2D>();
-            var treeObstacle = tree.AddComponent<Obstacle>();
-            SetField(treeObstacle, "_type", Obstacle.ObstacleType.Stumble);
+            var branch = CreateSpriteObject(root.transform, "LowBranch",
+                new Vector3(90f, GetGroundY(90f) + 0.6f, 0f),
+                new Vector2(0.5f, 0.8f), new Color(0.45f, 0.3f, 0.2f));
+            branch.AddComponent<BoxCollider2D>();
+            var branchObstacle = branch.AddComponent<Obstacle>();
+            SetField(branchObstacle, "_type", Obstacle.ObstacleType.Stumble);
         }
 
         private static void CreateHazardZone(GlucoseSystem glucoseSystem)
@@ -217,15 +214,9 @@ namespace SugarRush.Editor
             SetField(hazard, "_glucoseSystem", glucoseSystem);
             SetField(hazard, "_deltaPerSecond", -5f);
 
-            var renderer = GameObject.CreatePrimitive(PrimitiveType.Quad).GetComponent<Renderer>();
-            var visual = renderer.gameObject;
-            visual.name = "HazardVisual";
-            visual.transform.SetParent(go.transform);
+            var visual = CreateSpriteObject(go.transform, "HazardVisual",
+                Vector3.zero, new Vector2(20f, 8f), new Color(0.4f, 0.7f, 1f, 0.3f));
             visual.transform.localPosition = Vector3.zero;
-            visual.transform.localScale = Vector3.one;
-            UnityEngine.Object.DestroyImmediate(visual.GetComponent<Collider>());
-            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
-            renderer.sharedMaterial.color = new Color(0.4f, 0.7f, 1f, 0.3f);
         }
 
         private static void CreateItems(InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake)
@@ -239,35 +230,21 @@ namespace SugarRush.Editor
 
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            go.name = name;
-            go.transform.SetParent(parent);
-            go.transform.position = pos;
-            go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
+            var go = CreateSpriteObject(parent, name, pos, new Vector2(0.5f, 0.5f), color);
             var trigger = go.AddComponent<CircleCollider2D>();
             trigger.isTrigger = true;
             var pickup = go.AddComponent<PickupItem>();
             SetField(pickup, "_itemEffect", effect);
-            var renderer = go.GetComponent<Renderer>();
-            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
-            renderer.sharedMaterial.color = color;
         }
 
         private static void CreateFinishLine()
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            go.name = "FinishLine";
-            go.transform.position = new Vector3(180f, GetGroundY(180f) + 2f, 0f);
-            go.transform.localScale = new Vector3(1f, 4f, 1f);
-            UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
+            var go = CreateSpriteObject(null, "FinishLine",
+                new Vector3(180f, GetGroundY(180f) + 2f, 0f),
+                new Vector2(1f, 4f), Color.magenta);
             var trigger = go.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
-            trigger.size = new Vector2(1f, 1f);
             go.AddComponent<FinishLine>();
-            var renderer = go.GetComponent<Renderer>();
-            renderer.sharedMaterial = new Material(renderer.sharedMaterial);
-            renderer.sharedMaterial.color = Color.magenta;
         }
 
         private static GameObject CreateGameFlow(SugarRushInput input, GameObject player, LevelData levelData)
@@ -465,9 +442,38 @@ namespace SugarRush.Editor
             buttonTextRect.sizeDelta = Vector2.zero;
         }
 
+        private static void CreateSki(Transform parent, Vector2 localPosition)
+        {
+            var go = new GameObject("Ski");
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = new Vector3(localPosition.x, localPosition.y, 0f);
+            go.transform.localRotation = Quaternion.Euler(0f, 0f, -12f);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+            sr.color = new Color(0.2f, 0.2f, 0.2f);
+            sr.drawMode = SpriteDrawMode.Sliced;
+            sr.size = new Vector2(0.12f, 1.2f);
+        }
+
+        private static GameObject CreateSpriteObject(Transform parent, string name, Vector3 position, Vector2 size, Color color)
+        {
+            var go = new GameObject(name);
+            if (parent != null)
+            {
+                go.transform.SetParent(parent);
+            }
+            go.transform.position = position;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+            sr.color = color;
+            sr.drawMode = SpriteDrawMode.Sliced;
+            sr.size = size;
+            return go;
+        }
+
         private static float GetGroundY(float x)
         {
-            const float slopeAngle = 15f;
+            const float slopeAngle = 12f;
             return -x * Mathf.Tan(slopeAngle * Mathf.Deg2Rad);
         }
 
