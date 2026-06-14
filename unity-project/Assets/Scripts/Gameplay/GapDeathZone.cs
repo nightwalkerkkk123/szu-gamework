@@ -12,6 +12,7 @@ namespace SugarRush.Gameplay
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
+            if (other.transform.position.y >= _deathY) return;
 
             if (other.TryGetComponent<SkiingController>(out var controller))
             {

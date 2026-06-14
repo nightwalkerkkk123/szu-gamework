@@ -306,7 +306,7 @@ namespace SugarRush.Gameplay
             _rb.velocity = vel;
 
             // Tumble rotation visual (physics stays upright).
-            transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(-25f, 25f));
+            transform.rotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-25f, 25f));
 
             Debug.Log("[SkiingController] Stumbled.", this);
         }
