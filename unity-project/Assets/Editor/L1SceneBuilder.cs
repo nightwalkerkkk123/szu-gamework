@@ -463,6 +463,10 @@ namespace SugarRush.Editor
             canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
             canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
+            var eventSystem = new GameObject("EventSystem");
+            eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSystem.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+
             CreateGlucoseVisionOverlay(canvasGo.transform, player.GetComponent<GlucoseSystem>());
             CreateGlucoseBar(canvasGo.transform, player.GetComponent<GlucoseSystem>());
             CreateHUD(canvasGo.transform, player, levelManager);

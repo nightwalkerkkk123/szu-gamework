@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,6 +14,7 @@ namespace SugarRush.Foundation
         [SerializeField] private InputActionAsset _inputAsset;
 
         private InputActionMap _gameplayMap;
+        private readonly List<(InputAction action, Action<InputAction.CallbackContext> callback)> _bindings = new();
 
         public event Action OnJumpPressed;
         public event Action OnRollPressed;
@@ -44,12 +46,23 @@ namespace SugarRush.Foundation
         private void OnDisable()
         {
             _gameplayMap?.Disable();
+
+            foreach (var (action, callback) in _bindings)
+            {
+                if (action != null)
+                {
+                    action.performed -= callback;
+                }
+            }
+            _bindings.Clear();
         }
 
         private void Bind(string actionName, Action callback)
         {
             var action = _gameplayMap.FindAction(actionName, throwIfNotFound: true);
-            action.performed += _ => callback();
+            Action<InputAction.CallbackContext> wrapper = _ => callback();
+            _bindings.Add((action, wrapper));
+            action.performed += wrapper;
         }
     }
 }
