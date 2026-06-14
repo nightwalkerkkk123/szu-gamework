@@ -1,3 +1,4 @@
+using SugarRush.Core;
 using SugarRush.Foundation;
 using System.Collections;
 using UnityEngine;
