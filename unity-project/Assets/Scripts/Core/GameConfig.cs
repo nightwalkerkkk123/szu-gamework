@@ -17,18 +17,22 @@ namespace SugarRush.Core
 
         /// <summary>
         /// Initialize config service with ScriptableObject-backed repositories.
+        /// Null values are ignored so callers can safely pass whatever is available in the scene.
         /// </summary>
         public static void Initialize(
-            GlucoseConfig glucoseConfig,
-            SkiingConfig skiingConfig,
-            LevelData levelData)
+            GlucoseConfig glucoseConfig = null,
+            SkiingConfig skiingConfig = null,
+            LevelData levelData = null)
         {
             var service = ConfigService.Instance;
             service.ClearCache();
 
-            service.Register(new ScriptableObjectConfigRepository<GlucoseConfig>(glucoseConfig, GlucoseConfigId));
-            service.Register(new ScriptableObjectConfigRepository<SkiingConfig>(skiingConfig, SkiingConfigId));
-            service.Register(new ScriptableObjectConfigRepository<LevelData>(levelData, LevelDataConfigId));
+            if (glucoseConfig != null)
+                service.Register(new ScriptableObjectConfigRepository<GlucoseConfig>(glucoseConfig, GlucoseConfigId));
+            if (skiingConfig != null)
+                service.Register(new ScriptableObjectConfigRepository<SkiingConfig>(skiingConfig, SkiingConfigId));
+            if (levelData != null)
+                service.Register(new ScriptableObjectConfigRepository<LevelData>(levelData, LevelDataConfigId));
         }
 
         public static GlucoseConfig Glucose => ConfigService.Instance.Get<GlucoseConfig>(GlucoseConfigId);

@@ -31,6 +31,8 @@ namespace SugarRush.GameFlow
                 return;
             }
 
+            ResolvePlayerReferences();
+
             if (_startPoint != null && _player != null)
             {
                 _player.position = _startPoint.position;
@@ -45,6 +47,21 @@ namespace SugarRush.GameFlow
             SaveService.Instance.MarkDirty();
 
             Debug.Log($"[LevelManager] Level {_levelData.LevelId} started: {_levelData.DisplayName}", this);
+        }
+
+        private void ResolvePlayerReferences()
+        {
+            if (_player == null)
+            {
+                var playerGo = GameObject.FindWithTag("Player");
+                if (playerGo != null) _player = playerGo.transform;
+            }
+
+            if (_startPoint == null)
+            {
+                var startGo = GameObject.Find("StartPoint");
+                if (startGo != null) _startPoint = startGo.transform;
+            }
         }
 
         private void Update()

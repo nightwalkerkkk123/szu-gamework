@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53152674a97a4cf4cb06b5082a1ba587, type: 3}
   m_Name: InsulinSpray
   m_EditorClassIdentifier: 
-  <DisplayName>k__BackingField: 胰岛素喷雾
-  <Description>k__BackingField: 立即降低血糖 30 点。
+  <DisplayName>k__BackingField: "\u80F0\u5C9B\u7D20\u55B7\u96FE"
+  <Description>k__BackingField: "\u7ACB\u5373\u964D\u4F4E\u8840\u7CD6 30 \u70B9\u3002"
   <Icon>k__BackingField: {fileID: 0}
-  _instantDelta: -30
+  _instantDelta: -15

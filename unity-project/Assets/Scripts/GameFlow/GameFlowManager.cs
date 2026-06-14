@@ -33,7 +33,28 @@ namespace SugarRush.GameFlow
 
         private void Awake()
         {
+            ResolveReferences();
+            InitializeConfig();
             SubscribeEvents();
+        }
+
+        private void ResolveReferences()
+        {
+            if (_input == null) _input = FindObjectOfType<SugarRushInput>();
+            if (_playerController == null) _playerController = FindObjectOfType<SkiingController>();
+            if (_glucoseSystem == null) _glucoseSystem = FindObjectOfType<GlucoseSystem>();
+        }
+
+        private void InitializeConfig()
+        {
+            if (ConfigService.Instance.TryGet<GlucoseConfig>(out _)) return;
+
+            var skiingConfig = _playerController != null ? _playerController.Config : null;
+            var glucoseConfig = _glucoseSystem != null ? _glucoseSystem.Config : null;
+            var levelManager = FindObjectOfType<LevelManager>();
+            var levelData = levelManager != null ? levelManager.Data : null;
+
+            GameConfig.Initialize(glucoseConfig, skiingConfig, levelData);
         }
 
         private void OnDestroy()
@@ -148,17 +169,14 @@ namespace SugarRush.GameFlow
             }
 
             RecordResult(win);
-            GameEvents.RaiseGameFinished(win);
 
             Debug.Log($"[GameFlow] Result: {(win ? "Win" : "Lose")}.", this);
         }
 
         private void RecordResult(bool win)
         {
-            if (_playerController == null) return;
-
-            var level = GameConfig.Level;
             var levelManager = FindObjectOfType<LevelManager>();
+            var level = levelManager != null ? levelManager.Data : null;
 
             string levelId = level?.LevelId ?? "L1";
             float timeSeconds = levelManager != null ? levelManager.ElapsedTime : 0f;
@@ -189,7 +207,7 @@ namespace SugarRush.GameFlow
 
         private void HandleCrisisFailed()
         {
-            ForceResult(win: false);
+            GameEvents.RaiseGameFinished(false);
         }
     }
 }

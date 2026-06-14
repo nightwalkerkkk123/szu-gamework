@@ -34,6 +34,7 @@ namespace SugarRush.Gameplay
         public bool IsRolling => _isRolling;
         public bool IsStumbled => _isStumbled;
         public Vector2 Velocity => _rb.velocity;
+        public SkiingConfig Config => _config;
 
         public event Action<bool> OnGroundedChanged;
         public event Action<bool> OnRollingChanged;
@@ -320,6 +321,7 @@ namespace SugarRush.Gameplay
         public void TriggerCrash()
         {
             if (_isRolling) return; // invulnerable
+            if (!enabled) return;   // already crashed
 
             if (TryGetComponent<SimpleParticleSpawner>(out var spawner))
             {
@@ -335,6 +337,8 @@ namespace SugarRush.Gameplay
             enabled = false;
             _rb.velocity = Vector2.zero;
             _rb.gravityScale = 0f;
+
+            SugarRush.Core.GameEvents.RaiseGameFinished(false);
             Debug.Log("[SkiingController] Crashed.", this);
         }
 
