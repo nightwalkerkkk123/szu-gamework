@@ -169,7 +169,7 @@ namespace SugarRush.Editor
         {
             var go = new GameObject("Player");
             go.tag = "Player";
-            go.transform.position = new Vector3(0f, 0.8f, 0f);
+            go.transform.position = new Vector3(0f, 1.5f, 0f);
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
@@ -284,8 +284,11 @@ namespace SugarRush.Editor
             var itemsRoot = new GameObject("Items");
             var hazardsRoot = new GameObject("Hazards");
 
-            float currentX = 0f;
-            float currentY = 0f;
+            // Align the first ground piece so its center is at (0,0). Player spawns above it.
+            float firstRad = segments[0].SlopeAngle * Mathf.Deg2Rad;
+            float firstHalfLength = segments[0].GroundPieceLength * 0.5f;
+            float currentX = -firstHalfLength * Mathf.Cos(firstRad);
+            float currentY = firstHalfLength * Mathf.Sin(firstRad);
             int platformIndex = 0;
 
             foreach (var segment in segments)
