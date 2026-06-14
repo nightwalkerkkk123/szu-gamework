@@ -46,7 +46,15 @@ namespace SugarRush.GameFlow
             if (_playerController == null)
             {
                 var skiing = FindObjectOfType<SkiingController>();
-                _playerController = skiing != null ? skiing : FindObjectOfType<SpherePlayerController>();
+                if (skiing != null)
+                {
+                    _playerController = skiing;
+                }
+                else
+                {
+                    var sphere = FindObjectOfType<SpherePlayerController>();
+                    _playerController = sphere != null ? sphere : FindObjectOfType<EntitasPlayerBridge>();
+                }
             }
             if (_glucoseSystem == null) _glucoseSystem = FindObjectOfType<GlucoseSystem>();
         }

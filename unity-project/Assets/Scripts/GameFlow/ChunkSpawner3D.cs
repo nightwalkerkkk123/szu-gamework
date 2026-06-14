@@ -79,13 +79,8 @@ namespace SugarRush.GameFlow
                     continue;
                 }
 
-                float chunkEndX = chunk.transform.position.x + chunk.transform.localScale.x;
-                // Approximate destruction check using the chunk's bounds if available.
-                var renderer = chunk.GetComponentInChildren<Renderer>();
-                if (renderer != null)
-                {
-                    chunkEndX = renderer.bounds.max.x;
-                }
+                Bounds bounds = CalculateBounds(chunk);
+                float chunkEndX = bounds.max.x;
 
                 if (playerX - _destroyDistance > chunkEndX)
                 {
@@ -100,11 +95,43 @@ namespace SugarRush.GameFlow
             var definition = PickChunk();
             if (definition.Prefab == null) return;
 
-            var chunk = Instantiate(definition.Prefab, new Vector3(_nextChunkX, 0f, 0f), Quaternion.identity, transform);
+            // Instantiate at origin first; prefabs may have been saved at arbitrary world positions.
+            var chunk = Instantiate(definition.Prefab, Vector3.zero, Quaternion.identity, transform);
             chunk.name = $"Chunk_{definition.Prefab.name}_{_activeChunks.Count}";
-            _activeChunks.Add(chunk);
 
-            _nextChunkX += definition.Width;
+            Bounds bounds = CalculateBounds(chunk);
+
+            // Align the chunk's start (left side) to _nextChunkX and its bottom to y = 0.
+            Vector3 position = new Vector3(_nextChunkX - bounds.min.x, -bounds.min.y, 0f);
+            chunk.transform.position = position;
+
+            _activeChunks.Add(chunk);
+            _nextChunkX += bounds.size.x;
+        }
+
+        private static Bounds CalculateBounds(GameObject root)
+        {
+            var colliders = root.GetComponentsInChildren<Collider>();
+            if (colliders.Length == 0)
+            {
+                var renderers = root.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0) return new Bounds(root.transform.position, Vector3.zero);
+
+                Bounds renderBounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    renderBounds.Encapsulate(renderers[i].bounds);
+                }
+                return renderBounds;
+            }
+
+            Bounds bounds = colliders[0].bounds;
+            for (int i = 1; i < colliders.Length; i++)
+            {
+                if (colliders[i].isTrigger) continue;
+                bounds.Encapsulate(colliders[i].bounds);
+            }
+            return bounds;
         }
 
         private ChunkDefinition PickChunk()

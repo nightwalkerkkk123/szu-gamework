@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/L1_HospitalChalet.unity
     guid: 8f39e7574d6cd9242ab13f89003114a0
+  - enabled: 1
+    path: Assets/Scenes/L2_Fusion.unity
+    guid: ce1641a8b435f2342b9a2dd915d346ea
   m_configObjects: {}

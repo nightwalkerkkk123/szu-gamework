@@ -1,4 +1,5 @@
 using SugarRush.Core;
+using SugarRush.Gameplay;
 using UnityEngine;
 
 namespace SugarRush.GameFlow
@@ -55,6 +56,13 @@ namespace SugarRush.GameFlow
             {
                 var playerGo = GameObject.FindWithTag("Player");
                 if (playerGo != null) _player = playerGo.transform;
+            }
+
+            if (_player == null)
+            {
+                var bridge = FindObjectOfType<EntitasPlayerBridge>();
+                if (bridge != null && bridge.PlayerTransform != null)
+                    _player = bridge.PlayerTransform;
             }
 
             if (_startPoint == null)

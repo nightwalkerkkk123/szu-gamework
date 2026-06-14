@@ -41,9 +41,9 @@ namespace SugarRush.Foundation
 
         private void Awake()
         {
-            if (_config == null)
+            if (_config == null && ConfigService.Instance.TryGet<GlucoseConfig>(out var config))
             {
-                _config = GameConfig.Glucose;
+                _config = config;
             }
 
             if (_config == null)
