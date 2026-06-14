@@ -146,9 +146,40 @@ namespace SugarRush.GameFlow
             {
                 _glucoseSystem.enabled = false;
             }
+
+            RecordResult(win);
             GameEvents.RaiseGameFinished(win);
 
             Debug.Log($"[GameFlow] Result: {(win ? "Win" : "Lose")}.", this);
+        }
+
+        private void RecordResult(bool win)
+        {
+            if (_playerController == null) return;
+
+            var level = GameConfig.Level;
+            var levelManager = FindObjectOfType<LevelManager>();
+
+            string levelId = level?.LevelId ?? "L1";
+            float timeSeconds = levelManager != null ? levelManager.ElapsedTime : 0f;
+            float distance = levelManager != null ? levelManager.DistanceTraveled : 0f;
+            int score = CalculateScore(win, timeSeconds, distance, level);
+
+            SaveService.Instance.RecordRun(levelId, win, timeSeconds, score, distance);
+            SaveService.Instance.Save();
+        }
+
+        private int CalculateScore(bool win, float timeSeconds, float distance, LevelData level)
+        {
+            if (level == null) return 0;
+
+            int score = level.BaseScore;
+            if (win)
+            {
+                float timeBonus = Mathf.Max(0f, level.ParTimeSeconds - timeSeconds) * level.TimeBonusMultiplier;
+                score += Mathf.RoundToInt(timeBonus);
+            }
+            return score;
         }
 
         private void HandleGameFinished(bool win)

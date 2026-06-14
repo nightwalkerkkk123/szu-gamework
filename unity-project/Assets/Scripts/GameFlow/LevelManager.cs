@@ -1,3 +1,4 @@
+using SugarRush.Core;
 using UnityEngine;
 
 namespace SugarRush.GameFlow
@@ -11,7 +12,7 @@ namespace SugarRush.GameFlow
         [SerializeField] private Transform _player;
         [SerializeField] private Transform _startPoint;
 
-        public LevelData Data => _levelData;
+        public LevelData Data => _levelData ?? GameConfig.Level;
         public float ElapsedTime { get; private set; }
         public float DistanceTraveled { get; private set; }
 
@@ -21,7 +22,12 @@ namespace SugarRush.GameFlow
         {
             if (_levelData == null)
             {
-                Debug.LogWarning("[LevelManager] No LevelData assigned.", this);
+                _levelData = GameConfig.Level;
+            }
+
+            if (_levelData == null)
+            {
+                Debug.LogWarning("[LevelManager] No LevelData assigned and none registered in GameConfig.", this);
                 return;
             }
 
@@ -34,6 +40,9 @@ namespace SugarRush.GameFlow
             {
                 _lastPosition = _player.position;
             }
+
+            SaveService.Instance.Data.LastPlayedLevelId = _levelData.LevelId;
+            SaveService.Instance.MarkDirty();
 
             Debug.Log($"[LevelManager] Level {_levelData.LevelId} started: {_levelData.DisplayName}", this);
         }

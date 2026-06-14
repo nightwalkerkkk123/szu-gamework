@@ -44,15 +44,21 @@ namespace SugarRush.Gameplay
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
-            _rb.gravityScale = _config.gravityScale;
-            _rb.freezeRotation = true;
 
             if (_config == null)
             {
-                Debug.LogError("[SkiingController] SkiingConfig not assigned.", this);
+                _config = GameConfig.Skiing;
+            }
+
+            if (_config == null)
+            {
+                Debug.LogError("[SkiingController] SkiingConfig not assigned and none registered in GameConfig.", this);
                 enabled = false;
                 return;
             }
+
+            _rb.gravityScale = _config.gravityScale;
+            _rb.freezeRotation = true;
 
             if (_glucoseSystem == null)
             {

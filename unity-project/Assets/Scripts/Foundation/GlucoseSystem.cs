@@ -43,7 +43,12 @@ namespace SugarRush.Foundation
         {
             if (_config == null)
             {
-                Debug.LogError("[GlucoseSystem] No GlucoseConfig assigned.", this);
+                _config = GameConfig.Glucose;
+            }
+
+            if (_config == null)
+            {
+                Debug.LogError("[GlucoseSystem] No GlucoseConfig assigned and none registered in GameConfig.", this);
                 enabled = false;
                 return;
             }

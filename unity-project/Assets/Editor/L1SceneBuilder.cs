@@ -26,6 +26,8 @@ namespace SugarRush.Editor
             LoadAssets(out var glucoseConfig, out var skiingConfig, out var levelData,
                 out var insulin, out var pills, out var snowflake, out var slipperyGround);
 
+            GameConfig.Initialize(glucoseConfig, skiingConfig, levelData);
+
             var segments = EnsureSegments(levelData, insulin, pills, snowflake);
 
             var player = CreatePlayer(glucoseConfig, skiingConfig, slipperyGround);
