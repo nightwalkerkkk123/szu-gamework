@@ -20,3 +20,7 @@ MonoBehaviour:
   <StartGlucose>k__BackingField: 60
   <BaseScore>k__BackingField: 1000
   <TimeBonusMultiplier>k__BackingField: 10
+  <Segments>k__BackingField:
+  - {fileID: 11400000, guid: 4bf550269adb37c4bbe3e62b0af29dc8, type: 2}
+  - {fileID: 11400000, guid: 0e0d72ba113d8be449a97d8bf18b6c93, type: 2}
+  - {fileID: 11400000, guid: d8e76a069db832a439f3c3118189c6aa, type: 2}

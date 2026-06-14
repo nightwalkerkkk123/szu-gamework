@@ -17,7 +17,7 @@ namespace SugarRush.Core
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<TimerService>();
-                    if (_instance == null)
+                    if (_instance == null && Application.isPlaying && !Application.isQuitting)
                     {
                         var go = new GameObject(nameof(TimerService));
                         _instance = go.AddComponent<TimerService>();
@@ -41,6 +41,14 @@ namespace SugarRush.Core
             }
 
             _instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
         }
 
         private void Update()
