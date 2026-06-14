@@ -19,8 +19,10 @@ namespace SugarRush.GameFlow
     public class GameFlowManager : MonoBehaviour
     {
         [SerializeField] private SugarRushInput _input;
-        [SerializeField] private SkiingController _playerController;
+        [SerializeField] private MonoBehaviour _playerController;
         [SerializeField] private GlucoseSystem _glucoseSystem;
+
+        private IPlayerController PlayerController => _playerController as IPlayerController;
 
         [Header("Timing")]
         [SerializeField] private float _introDuration = 1.5f;
@@ -41,7 +43,11 @@ namespace SugarRush.GameFlow
         private void ResolveReferences()
         {
             if (_input == null) _input = FindObjectOfType<SugarRushInput>();
-            if (_playerController == null) _playerController = FindObjectOfType<SkiingController>();
+            if (_playerController == null)
+            {
+                var skiing = FindObjectOfType<SkiingController>();
+                _playerController = skiing != null ? skiing : FindObjectOfType<SpherePlayerController>();
+            }
             if (_glucoseSystem == null) _glucoseSystem = FindObjectOfType<GlucoseSystem>();
         }
 
@@ -49,7 +55,8 @@ namespace SugarRush.GameFlow
         {
             if (ConfigService.Instance.TryGet<GlucoseConfig>(out _)) return;
 
-            var skiingConfig = _playerController != null ? _playerController.Config : null;
+            var skiingController = _playerController as SkiingController;
+            var skiingConfig = skiingController != null ? skiingController.Config : null;
             var glucoseConfig = _glucoseSystem != null ? _glucoseSystem.Config : null;
             var levelManager = FindObjectOfType<LevelManager>();
             var levelData = levelManager != null ? levelManager.Data : null;
@@ -115,7 +122,7 @@ namespace SugarRush.GameFlow
             _introTimer = _introDuration;
             Time.timeScale = 1f;
 
-            _playerController?.SetEnabled(false);
+            PlayerController?.SetEnabled(false);
 
             Debug.Log("[GameFlow] Intro started.", this);
         }
@@ -128,7 +135,7 @@ namespace SugarRush.GameFlow
             Time.timeScale = 1f;
             _resultReported = false;
 
-            _playerController?.SetEnabled(true);
+            PlayerController?.SetEnabled(true);
             GameEvents.RaiseGameStarted();
 
             Debug.Log("[GameFlow] Playing started.", this);
@@ -162,7 +169,7 @@ namespace SugarRush.GameFlow
             _resultReported = true;
             Time.timeScale = win ? 1f : 0f;
 
-            _playerController?.SetEnabled(false);
+            PlayerController?.SetEnabled(false);
             if (_glucoseSystem != null)
             {
                 _glucoseSystem.enabled = false;

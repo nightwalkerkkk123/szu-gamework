@@ -11,8 +11,10 @@ namespace SugarRush.Foundation
     public class HUD : MonoBehaviour
     {
         [SerializeField] private LevelManager _levelManager;
-        [SerializeField] private SkiingController _skiingController;
+        [SerializeField] private MonoBehaviour _playerController;
         [SerializeField] private GlucoseSystem _glucoseSystem;
+
+        private IPlayerController PlayerController => _playerController as IPlayerController;
 
         [SerializeField] private Text _distanceText;
         [SerializeField] private Text _speedText;
@@ -35,9 +37,9 @@ namespace SugarRush.Foundation
                 SetText(_timeText, "时间: --");
             }
 
-            if (_skiingController != null)
+            if (PlayerController != null)
             {
-                SetText(_speedText, $"速度: {_skiingController.Velocity.magnitude:F1}m/s");
+                SetText(_speedText, $"速度: {PlayerController.Speed:F1}m/s");
             }
             else
             {

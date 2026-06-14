@@ -10,7 +10,7 @@ namespace SugarRush.Gameplay
     /// Includes coyote time, jump buffering and landing feedback.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class SkiingController : MonoBehaviour
+    public class SkiingController : MonoBehaviour, IPlayerController
     {
         [SerializeField] private SkiingConfig _config;
         [SerializeField] private GlucoseSystem _glucoseSystem;
@@ -34,6 +34,7 @@ namespace SugarRush.Gameplay
         public bool IsRolling => _isRolling;
         public bool IsStumbled => _isStumbled;
         public Vector2 Velocity => _rb.velocity;
+        public float Speed => _rb.velocity.magnitude;
         public SkiingConfig Config => _config;
 
         public event Action<bool> OnGroundedChanged;

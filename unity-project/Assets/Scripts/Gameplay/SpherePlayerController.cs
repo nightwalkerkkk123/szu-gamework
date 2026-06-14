@@ -1,0 +1,120 @@
+using SugarRush.Core;
+using SugarRush.Foundation;
+using UnityEngine;
+
+namespace SugarRush.Gameplay
+{
+    /// <summary>
+    /// 3D sphere controller for the fused endless-runner mode.
+    /// Preserves SugarRush glucose mechanics while driving a rolling sphere.
+    /// </summary>
+    [RequireComponent(typeof(Rigidbody))]
+    public class SpherePlayerController : MonoBehaviour, IPlayerController
+    {
+        [SerializeField] private GlucoseSystem _glucoseSystem;
+        [SerializeField] private SugarRushInput _input;
+
+        [Header("Movement")]
+        [SerializeField] private float _baseAcceleration = 18f;
+        [SerializeField] private float _maxSpeed = 25f;
+        [SerializeField] private float _jumpForce = 12f;
+        [SerializeField] private float _groundCheckDistance = 0.55f;
+        [SerializeField] private LayerMask _groundMask;
+
+        [Header("Glucose Impact")]
+        [SerializeField] private float _minSpeedMultiplier = 0.5f;
+        [SerializeField] private float _maxSpeedMultiplier = 1.25f;
+
+        private Rigidbody _rb;
+        private bool _isGrounded;
+        private bool _isDead;
+
+        public bool IsGrounded => _isGrounded;
+        public float Speed => _rb.velocity.magnitude;
+
+        private void Awake()
+        {
+            _rb = GetComponent<Rigidbody>();
+            _rb.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
+
+            if (_glucoseSystem == null) _glucoseSystem = GetComponent<GlucoseSystem>();
+            if (_input == null) _input = FindObjectOfType<SugarRushInput>();
+            if (_input != null) _input.OnJumpPressed += TryJump;
+        }
+
+        private void OnDestroy()
+        {
+            if (_input != null) _input.OnJumpPressed -= TryJump;
+        }
+
+        private void FixedUpdate()
+        {
+            if (_isDead) return;
+
+            _isGrounded = CheckGrounded();
+
+            float speedMod = CalculateSpeedModifier();
+            float controlMod = _glucoseSystem != null ? _glucoseSystem.ControlModifier : 1f;
+
+            // Forward acceleration along the slope / platform.
+            _rb.AddForce(Vector3.right * _baseAcceleration * speedMod, ForceMode.Force);
+
+            // Clamp horizontal speed.
+            Vector3 velocity = _rb.velocity;
+            if (velocity.x > _maxSpeed * speedMod)
+            {
+                velocity.x = _maxSpeed * speedMod;
+                _rb.velocity = velocity;
+            }
+
+            // Reduced air control based on glucose.
+            if (!_isGrounded)
+            {
+                float desiredX = _maxSpeed * speedMod * controlMod;
+                float deltaX = desiredX - velocity.x;
+                _rb.AddForce(Vector3.right * deltaX * 2f * controlMod, ForceMode.Force);
+            }
+        }
+
+        private float CalculateSpeedModifier()
+        {
+            if (_glucoseSystem == null) return 1f;
+
+            float t = _glucoseSystem.CurrentValue / 100f;
+            return Mathf.Lerp(_minSpeedMultiplier, _maxSpeedMultiplier, t);
+        }
+
+        private void TryJump()
+        {
+            if (!enabled || _isDead || !_isGrounded) return;
+
+            _rb.velocity = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+            _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        }
+
+        private bool CheckGrounded()
+        {
+            return Physics.Raycast(transform.position, Vector3.down, _groundCheckDistance, _groundMask);
+        }
+
+        public void Die()
+        {
+            if (_isDead) return;
+            _isDead = true;
+            enabled = false;
+            _rb.velocity = Vector3.zero;
+            _rb.useGravity = false;
+            GameEvents.RaiseGameFinished(false);
+        }
+
+        public void SetEnabled(bool enabled)
+        {
+            this.enabled = enabled;
+            if (_rb != null)
+            {
+                _rb.velocity = enabled ? _rb.velocity : Vector3.zero;
+                _rb.useGravity = enabled;
+            }
+        }
+    }
+}
