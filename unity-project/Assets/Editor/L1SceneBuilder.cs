@@ -592,6 +592,8 @@ namespace SugarRush.Editor
             CreateGlucoseBar(canvasGo.transform, player.GetComponent<GlucoseSystem>());
             CreateHUD(canvasGo.transform, player, levelManager);
             CreateResultPanel(canvasGo.transform);
+            CreatePauseMenu(canvasGo.transform);
+            CreatePauseController();
         }
 
         private static void CreateGlucoseVisionOverlay(Transform canvas, GlucoseSystem glucoseSystem)
@@ -679,18 +681,13 @@ namespace SugarRush.Editor
             hudGo.transform.SetParent(canvas, false);
             var hud = hudGo.AddComponent<HUD>();
             SetField(hud, "_levelManager", levelManager);
-            SetField(hud, "_skiingController", player.GetComponent<SkiingController>());
+            SetField(hud, "_playerController", player.GetComponent<SkiingController>());
             SetField(hud, "_glucoseSystem", player.GetComponent<GlucoseSystem>());
 
-            var distanceText = CreateText(hudGo.transform, "DistanceText", new Vector2(20f, -60f), TextAnchor.UpperLeft);
-            var speedText = CreateText(hudGo.transform, "SpeedText", new Vector2(20f, -90f), TextAnchor.UpperLeft);
-            var timeText = CreateText(hudGo.transform, "TimeText", new Vector2(20f, -120f), TextAnchor.UpperLeft);
-            var glucoseText = CreateText(hudGo.transform, "GlucoseValueText", new Vector2(330f, -20f), TextAnchor.UpperLeft);
-
-            SetField(hud, "_distanceText", distanceText);
-            SetField(hud, "_speedText", speedText);
-            SetField(hud, "_timeText", timeText);
-            SetField(hud, "_glucoseText", glucoseText);
+            // Round 1: HUD self-builds its text/bars/icons in Awake.EnsureUI when
+            // these fields are null. Pre-2026 build assigned them here explicitly;
+            // the new HUD no longer needs that, but keep the assignments empty
+            // (a no-op when fields are null in EnsureUI).
         }
 
         private static Text CreateText(Transform parent, string name, Vector2 anchoredPosition, TextAnchor anchor)
@@ -781,6 +778,69 @@ namespace SugarRush.Editor
             buttonTextRect.anchorMin = Vector2.zero;
             buttonTextRect.anchorMax = Vector2.one;
             buttonTextRect.sizeDelta = Vector2.zero;
+
+            // Stat text rows between MessageText and RestartButton
+            var distanceStat = CreateStatRow(root.transform, "DistanceStat", 10f, 24);
+            SetField(panel, "_distanceStat", distanceStat);
+            var timeStat = CreateStatRow(root.transform, "TimeStat", -22f, 24);
+            SetField(panel, "_timeStat", timeStat);
+            var parTimeStat = CreateStatRow(root.transform, "ParTimeStat", -50f, 22);
+            parTimeStat.fontStyle = FontStyle.Italic;
+            parTimeStat.color = new Color(0.85f, 0.85f, 0.85f);
+            SetField(panel, "_parTimeStat", parTimeStat);
+
+            // Quit button below RestartButton
+            var quitGo = new GameObject("QuitButton");
+            quitGo.transform.SetParent(root.transform, false);
+            var quitImage = quitGo.AddComponent<UnityEngine.UI.Image>();
+            quitImage.color = new Color(0.4f, 0.2f, 0.2f);
+            var quitRect = quitGo.GetComponent<RectTransform>();
+            quitRect.anchorMin = new Vector2(0.5f, 0.5f);
+            quitRect.anchorMax = new Vector2(0.5f, 0.5f);
+            quitRect.pivot = new Vector2(0.5f, 0.5f);
+            quitRect.anchoredPosition = new Vector2(0f, -160f);
+            quitRect.sizeDelta = new Vector2(200f, 50f);
+            var quitButton = quitGo.AddComponent<UnityEngine.UI.Button>();
+            SetField(panel, "_quitButton", quitButton);
+            var quitText = CreateText(quitGo.transform, "QuitText", Vector2.zero, TextAnchor.MiddleCenter);
+            quitText.fontSize = 24;
+            quitText.color = Color.white;
+            quitText.text = "退出";
+            var quitTextRect = quitText.GetComponent<RectTransform>();
+            quitTextRect.anchorMin = Vector2.zero;
+            quitTextRect.anchorMax = Vector2.one;
+            quitTextRect.sizeDelta = Vector2.zero;
+        }
+
+        private static UnityEngine.UI.Text CreateStatRow(Transform parent, string name, float yOffset, int fontSize)
+        {
+            var t = CreateText(parent, name, Vector2.zero, TextAnchor.MiddleCenter);
+            t.fontSize = fontSize;
+            t.text = "--";
+            var rect = t.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, yOffset);
+            rect.sizeDelta = new Vector2(600f, 30f);
+            return t;
+        }
+
+        private static void CreatePauseMenu(Transform canvas)
+        {
+            // PauseMenu self-builds the panel and buttons in Awake.EnsureUI when
+            // its serialized fields are null, so we just need the host GameObject.
+            var go = new GameObject("PauseMenu");
+            go.transform.SetParent(canvas, false);
+            go.AddComponent<PauseMenu>();
+        }
+
+        private static void CreatePauseController()
+        {
+            // PauseController self-resolves SugarRushInput via FindObjectOfType
+            // in Awake, so a bare host GameObject is enough.
+            var go = new GameObject("PauseController");
+            go.AddComponent<PauseController>();
         }
 
         private static void CreateSki(Transform parent, Vector2 localPosition)
