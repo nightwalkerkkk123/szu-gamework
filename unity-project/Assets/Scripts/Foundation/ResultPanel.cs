@@ -102,17 +102,10 @@ namespace SugarRush.Foundation
 
         private void RestartLevel()
         {
-            StartCoroutine(RestartLevelAfterFrame());
-        }
-
-        private System.Collections.IEnumerator RestartLevelAfterFrame()
-        {
-            yield return null;
-            Time.timeScale = 1f;
-
-            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Debug.Log($"[ResultPanel] Restarting scene: {sceneName}");
-            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+            // Round 2: runtime reset. Hide the result panel first so the player
+            // doesn't see a flicker, then reset run state in place.
+            if (_panel != null) _panel.SetActive(false);
+            RuntimeResetter.Reset();
         }
 
         private void QuitGame()

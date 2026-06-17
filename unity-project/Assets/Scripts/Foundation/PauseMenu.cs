@@ -1,6 +1,5 @@
 using SugarRush.Core;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace SugarRush.Foundation
@@ -192,11 +191,10 @@ namespace SugarRush.Foundation
 
         private void OnRestartClicked()
         {
-            // Round 1 MVP: hard scene reload. Round 2 will swap this for a
-            // runtime reset so obstacles and pooled objects also respawn.
-            Time.timeScale = 1f;
-            var scene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(scene.name);
+            // Round 2: runtime reset. RuntimeResetter re-snapshots the player,
+            // glucose, and level counters without rebuilding the scene. If
+            // something goes wrong it falls back to a scene reload.
+            RuntimeResetter.Reset();
         }
 
         private void OnQuitClicked()
