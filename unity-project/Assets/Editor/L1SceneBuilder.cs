@@ -79,43 +79,88 @@ namespace SugarRush.Editor
             // Always recreate L1 segments so iteration is consistent.
             DeleteSegmentAssets(folder);
 
-            var segment1 = CreateSegmentAsset($"{folder}/L1_Segment_Tutorial.asset", "L1_Tutorial", 60f, 12f,
+            // Per-obstacle-type colors (placeholder sprites; helps the player read intent at a glance).
+            Color stumbleColor = new Color(0.55f, 0.4f, 0.35f);
+            Color jumpableColor = new Color(0.4f, 0.65f, 0.3f);
+            Color rollableColor = new Color(0.4f, 0.5f, 0.6f);
+            Color avoidableColor = new Color(0.8f, 0.2f, 0.15f);
+
+            // 1. Intro (250m, gentle 8° slope) — single low Stumble, first Insulin pickup.
+            var segment1 = CreateSegmentAsset($"{folder}/L1_Segment_Intro.asset", "L1_Intro", 250f, 8f,
                 obstacles: new SegmentObstacle[]
                 {
-                    new SegmentObstacle { DistanceAlongSegment = 35f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) }
+                    new SegmentObstacle { DistanceAlongSegment = 180f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = stumbleColor }
                 },
                 pickups: new SegmentPickup[]
                 {
-                    new SegmentPickup { DistanceAlongSegment = 55f, HeightOffset = 1.5f, ItemEffect = insulin, Color = Color.blue }
+                    new SegmentPickup { DistanceAlongSegment = 120f, HeightOffset = 1.5f, ItemEffect = insulin, Color = Color.blue }
                 });
 
-            var segment2 = CreateSegmentAsset($"{folder}/L1_Segment_Rocks.asset", "L1_Rocks", 60f, 12f,
+            // 2. FirstJump (200m, 12°) — two low Jumpable to teach jumping.
+            var segment2 = CreateSegmentAsset($"{folder}/L1_Segment_FirstJump.asset", "L1_FirstJump", 200f, 12f,
                 obstacles: new SegmentObstacle[]
                 {
-                    new SegmentObstacle { DistanceAlongSegment = 15f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) },
-                    new SegmentObstacle { DistanceAlongSegment = 45f, HeightOffset = 1.3f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.6f, 0.4f), Color = new Color(0.45f, 0.3f, 0.2f) }
-                },
-                pickups: new SegmentPickup[]
-                {
-                    new SegmentPickup { DistanceAlongSegment = 50f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green }
-                },
-                hasGap: true, gapStart: 0.65f, gapEnd: 0.85f);
+                    new SegmentObstacle { DistanceAlongSegment = 60f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 140f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor }
+                });
 
-            var segment3 = CreateSegmentAsset($"{folder}/L1_Segment_ColdWind.asset", "L1_ColdWind", 60f, 12f,
+            // 3. FirstRoll (250m, 12°) — three Rollable to teach rolling (invuln).
+            var segment3 = CreateSegmentAsset($"{folder}/L1_Segment_FirstRoll.asset", "L1_FirstRoll", 250f, 12f,
                 obstacles: new SegmentObstacle[]
                 {
-                    new SegmentObstacle { DistanceAlongSegment = 45f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble, Size = new Vector2(0.8f, 0.8f), Color = new Color(0.55f, 0.4f, 0.35f) }
+                    new SegmentObstacle { DistanceAlongSegment = 50f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 130f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor }
+                });
+
+            // 4. ItemTutorial (250m, 12°) — pickup-only, teaches auto-pickup and item use.
+            var segment4 = CreateSegmentAsset($"{folder}/L1_Segment_ItemTutorial.asset", "L1_ItemTutorial", 250f, 12f,
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 80f,  HeightOffset = 1.5f, ItemEffect = insulin,   Color = Color.blue },
+                    new SegmentPickup { DistanceAlongSegment = 180f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
+                });
+
+            // 5. Mixed (400m, 10° — breathing slope) — combines Jumpable-tall, Rollable, Stumble, ColdWind, Pills.
+            var segment5 = CreateSegmentAsset($"{folder}/L1_Segment_Mixed.asset", "L1_Mixed", 400f, 10f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 100f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 1.4f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 320f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble,  Size = new Vector2(0.8f, 0.8f), Color = stumbleColor }
                 },
                 pickups: new SegmentPickup[]
                 {
-                    new SegmentPickup { DistanceAlongSegment = 30f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
+                    new SegmentPickup { DistanceAlongSegment = 250f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green }
                 },
                 hazards: new SegmentHazard[]
                 {
-                    new SegmentHazard { DistanceAlongSegment = 10f, CenterHeightOffset = 4f, Size = new Vector2(20f, 8f), DeltaPerSecond = -5f }
+                    // ColdWind band, ~80m wide, 4m tall, centered at 320m.
+                    new SegmentHazard { DistanceAlongSegment = 320f, CenterHeightOffset = 4f, Size = new Vector2(80f, 4f), DeltaPerSecond = -3f }
                 });
 
-            var segments = new List<LevelSegmentData> { segment1, segment2, segment3 };
+            // 6. FinalSprint (350m, 16° — peak slope) — Jumpable, Rollable, Avoidable, Snowflake, ColdWind.
+            var segment6 = CreateSegmentAsset($"{folder}/L1_Segment_FinalSprint.asset", "L1_FinalSprint", 350f, 16f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 80f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable,  HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 160f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable,  Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 280f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Avoidable,  Size = new Vector2(1.2f, 1.2f), Color = avoidableColor }
+                },
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 220f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
+                },
+                hazards: new SegmentHazard[]
+                {
+                    // ColdWind band, 80m wide, centered at 140m.
+                    new SegmentHazard { DistanceAlongSegment = 140f, CenterHeightOffset = 4f, Size = new Vector2(80f, 4f), DeltaPerSecond = -2f }
+                });
+
+            // 7. HospitalStation (300m, 8° — release) — clean approach to the FinishLine.
+            var segment7 = CreateSegmentAsset($"{folder}/L1_Segment_HospitalStation.asset", "L1_HospitalStation", 300f, 8f);
+
+            var segments = new List<LevelSegmentData> { segment1, segment2, segment3, segment4, segment5, segment6, segment7 };
             level.SetSegments(segments);
             EditorUtility.SetDirty(level);
             AssetDatabase.SaveAssets();

@@ -79,8 +79,8 @@ namespace SugarRush.Foundation
         {
             float deltaTime = Time.deltaTime;
 
-            // Passive skiing decay
-            ApplyDelta(-_config.passiveDecayPerSecond * deltaTime);
+            // Passive skiing decay — zone-aware (GDD §4.4).
+            ApplyDelta(ResolveZoneDrift() * deltaTime);
 
             // Environmental / hazard passive delta
             if (_passiveDeltaPerSecond != 0f)
@@ -188,6 +188,23 @@ namespace SugarRush.Foundation
                 // Reset timers when leaving crisis zones
                 if (_currentZone != GlucoseZone.LowCrisis) _lowCrisisTimer = 0f;
                 if (_currentZone != GlucoseZone.HighCrisis) _highCrisisTimer = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Resolves the per-zone passive drift rate (GDD §4.4). The rate is
+        /// applied once per frame, multiplied by <c>Time.deltaTime</c>.
+        /// </summary>
+        private float ResolveZoneDrift()
+        {
+            if (_config == null) return 0f;
+            switch (_currentZone)
+            {
+                case GlucoseZone.LowCrisis: return _config.driftLowCrisis;
+                case GlucoseZone.LowWarning: return _config.driftLowWarning;
+                case GlucoseZone.HighWarning: return _config.driftHighWarning;
+                case GlucoseZone.HighCrisis: return _config.driftHighCrisis;
+                default: return _config.driftNormal;
             }
         }
 

@@ -13,8 +13,25 @@ namespace SugarRush.Foundation
         [Tooltip("Starting glucose value (0-100).")]
         [Range(0f, 100f)] public float startValue = 60f;
 
-        [Tooltip("Passive decay per second while skiing.")]
-        public float passiveDecayPerSecond = 1.5f;
+        [Header("Passive Drift (per zone, GDD §4.4)")]
+        [Tooltip("Drift per second while in Low Crisis (0..lowCrisisThreshold).")]
+        public float driftLowCrisis = -0.2f;
+
+        [Tooltip("Drift per second while in Low Warning (lowCrisisThreshold..lowWarningThreshold).")]
+        public float driftLowWarning = -0.3f;
+
+        [Tooltip("Drift per second while in Safe zone (lowWarningThreshold..highWarningThreshold).")]
+        public float driftNormal = -0.5f;
+
+        [Tooltip("Drift per second while in High Warning (highWarningThreshold..highCrisisThreshold).")]
+        public float driftHighWarning = 0.8f;
+
+        [Tooltip("Drift per second while in High Crisis (highCrisisThreshold..100).")]
+        public float driftHighCrisis = 1.2f;
+
+        [Tooltip("Legacy single-value decay kept temporarily for asset compat. Use the per-zone drift fields above instead.")]
+        [System.Obsolete("Use driftLowCrisis / driftLowWarning / driftNormal / driftHighWarning / driftHighCrisis instead.")]
+        public float passiveDecayPerSecond = 0.5f;
 
         [Header("Zones")]
         [Tooltip("Upper bound of Low Crisis zone (inclusive).")]

@@ -59,6 +59,10 @@ namespace SugarRush.GameFlow
         public float HeightOffset = 0.4f;
 
         public Obstacle.ObstacleType Type = Obstacle.ObstacleType.Stumble;
+
+        [Tooltip("For Jumpable obstacles: required clearance in meters. 0 = any jump clears. >0 = player must jump high enough to clear this height; otherwise the contact stumbles.")]
+        public float HeightMeters = 0f;
+
         public Vector2 Size = new Vector2(0.8f, 0.8f);
         public Color Color = new Color(0.55f, 0.4f, 0.35f);
     }
