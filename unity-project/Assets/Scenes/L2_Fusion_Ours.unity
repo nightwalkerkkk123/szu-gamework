@@ -213,7 +213,7 @@ MonoBehaviour:
   _groundCheckDistance: 0.55
   _groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   _minSpeedMultiplier: 0.5
   _maxSpeedMultiplier: 1.25
 --- !u!114 &11965873
@@ -226,9 +226,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7550878f64510c04f8ea2d45ac74a11e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _config: {fileID: 0}
+  m_Name:
+  m_EditorClassIdentifier:
+  _config: {fileID: 11400000, guid: 49e3fdf1ddbf65444baf8d30a4059fb0, type: 2}
   _currentValue: 0
   _currentZone: 0
   _lowCrisisTimer: 0
@@ -340,7 +340,7 @@ Transform:
   m_GameObject: {fileID: 11965869}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -493,9 +493,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f03824ede3856e148865271bbef94b55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _inputAsset: {fileID: 0}
+  m_Name:
+  m_EditorClassIdentifier:
+  _inputAsset: {fileID: -944628639613478452, guid: 252f7448b8c2afe4fb04d3d3d5739ece, type: 3}
 --- !u!4 &292239664
 Transform:
   m_ObjectHideFlags: 0
@@ -1823,10 +1823,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c69d839dbfff67b469dd1e9e3b2b049b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   _input: {fileID: 292239663}
-  _playerController: {fileID: 11965873}
+  _playerController: {fileID: 11965872}
   _glucoseSystem: {fileID: 11965873}
   _introDuration: 1.5
 --- !u!4 &1945933230

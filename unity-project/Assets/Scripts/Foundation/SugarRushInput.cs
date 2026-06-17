@@ -60,9 +60,14 @@ namespace SugarRush.Foundation
         private void Bind(string actionName, Action callback)
         {
             var action = _gameplayMap.FindAction(actionName, throwIfNotFound: true);
-            Action<InputAction.CallbackContext> wrapper = _ => callback();
+            Action<InputAction.CallbackContext> wrapper = _ =>
+            {
+                Debug.Log($"[SugarRushInput-DIAG] {actionName} triggered");
+                callback();
+            };
             _bindings.Add((action, wrapper));
             action.performed += wrapper;
+            Debug.Log($"[SugarRushInput-DIAG] Bound action '{actionName}' to map '{_gameplayMap.name}'");
         }
     }
 }

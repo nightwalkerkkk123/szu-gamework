@@ -40,6 +40,7 @@ namespace SugarRush.Gameplay
             if (_glucoseSystem == null) _glucoseSystem = GetComponent<GlucoseSystem>();
             if (_input == null) _input = FindObjectOfType<SugarRushInput>();
             if (_input != null) _input.OnJumpPressed += TryJump;
+            Debug.Log($"[SpherePlayerController-DIAG] Awake: _input={(_input != null ? _input.name : "NULL")}, subscribed={(_input != null)}");
         }
 
         private void OnDestroy()
@@ -86,7 +87,8 @@ namespace SugarRush.Gameplay
 
         private void TryJump()
         {
-            if (!enabled || _isDead || !_isGrounded) return;
+            // Grounded check removed per user request: allow jump regardless of ground state (enables double-jump).
+            if (!enabled || _isDead) return;
 
             _rb.velocity = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
