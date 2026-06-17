@@ -7,7 +7,8 @@ using Cinemachine;
 namespace SugarRush.Gameplay
 {
     /// <summary>
-    /// Camera feel effects: speed-based zoom, landing shake, glucose crisis offset.
+    /// Camera feel effects: speed-based zoom, landing shake, stumble/crash shake,
+    /// glucose crisis offset, roll zoom burst.
     /// </summary>
     [RequireComponent(typeof(CinemachineVirtualCamera))]
     public class CameraEffects : MonoBehaviour
@@ -25,6 +26,14 @@ namespace SugarRush.Gameplay
         [SerializeField] private float _shakeDuration = 0.15f;
         [SerializeField] private float _shakeAmplitude = 0.3f;
         [SerializeField] private float _minFallSpeedForShake = 5f;
+
+        [Header("Stumble Shake")]
+        [SerializeField] private float _stumbleShakeDuration = 0.25f;
+        [SerializeField] private float _stumbleShakeAmplitude = 0.4f;
+
+        [Header("Crash Shake")]
+        [SerializeField] private float _crashShakeDuration = 0.5f;
+        [SerializeField] private float _crashShakeAmplitude = 0.7f;
 
         [Header("Glucose Crisis Offset")]
         [SerializeField] private float _crisisOffsetAmount = 0.25f;
@@ -56,6 +65,8 @@ namespace SugarRush.Gameplay
             {
                 _skiingController.OnGroundedChanged += HandleGroundedChanged;
                 _skiingController.OnRollingChanged += HandleRollingChanged;
+                _skiingController.OnStumbledChanged += HandleStumbledChanged;
+                _skiingController.OnCrashed += HandleCrashed;
             }
 
             if (_glucoseSystem != null)
@@ -74,6 +85,8 @@ namespace SugarRush.Gameplay
             {
                 _skiingController.OnGroundedChanged -= HandleGroundedChanged;
                 _skiingController.OnRollingChanged -= HandleRollingChanged;
+                _skiingController.OnStumbledChanged -= HandleStumbledChanged;
+                _skiingController.OnCrashed -= HandleCrashed;
             }
 
             if (_glucoseSystem != null)
@@ -149,7 +162,7 @@ namespace SugarRush.Gameplay
                 float fallSpeed = Mathf.Abs(_skiingController.Velocity.y);
                 if (fallSpeed >= _minFallSpeedForShake)
                 {
-                    StartCoroutine(ShakeCoroutine(_shakeAmplitude * Mathf.Clamp01(fallSpeed / 15f)));
+                    StartCoroutine(ShakeCoroutine(_shakeDuration, _shakeAmplitude * Mathf.Clamp01(fallSpeed / 15f)));
                 }
             }
         }
@@ -162,19 +175,41 @@ namespace SugarRush.Gameplay
             }
         }
 
+        private void HandleStumbledChanged(bool isStumbled)
+        {
+            if (isStumbled)
+            {
+                StartCoroutine(ShakeCoroutine(_stumbleShakeDuration, _stumbleShakeAmplitude));
+            }
+        }
+
+        private void HandleCrashed()
+        {
+            StartCoroutine(ShakeCoroutine(_crashShakeDuration, _crashShakeAmplitude));
+        }
+
         private void HandleZoneChanged(GlucoseZone zone)
         {
             // Offset updates are handled in Update.
         }
 
-        private IEnumerator ShakeCoroutine(float amplitude)
+        /// <summary>
+        /// Trigger a camera shake with the given duration (seconds) and amplitude.
+        /// Any caller can invoke this directly.
+        /// </summary>
+        public void TriggerShake(float duration, float amplitude)
+        {
+            StartCoroutine(ShakeCoroutine(duration, amplitude));
+        }
+
+        private IEnumerator ShakeCoroutine(float duration, float amplitude)
         {
             _noise.m_AmplitudeGain = amplitude;
             float elapsed = 0f;
-            while (elapsed < _shakeDuration)
+            while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                _noise.m_AmplitudeGain = Mathf.Lerp(amplitude, 0f, elapsed / _shakeDuration);
+                _noise.m_AmplitudeGain = Mathf.Lerp(amplitude, 0f, elapsed / duration);
                 yield return null;
             }
             _noise.m_AmplitudeGain = 0f;
