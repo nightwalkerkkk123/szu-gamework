@@ -40,6 +40,7 @@ namespace SugarRush.Editor
             CreateGapDeathZone();
             var flow = CreateGameFlow(input, player, levelData);
             CreateUI(player, flow.GetComponent<LevelManager>());
+            CreateGameFeel(player, flow.GetComponent<LevelManager>());
 
             EditorSceneManager.SaveScene(scene, scenePath);
             EnsureSceneInBuildSettings(scenePath);
@@ -594,6 +595,68 @@ namespace SugarRush.Editor
             CreateResultPanel(canvasGo.transform);
             CreatePauseMenu(canvasGo.transform);
             CreatePauseController();
+        }
+
+        // ── Game feel wiring ───────────────────────────────────────────────────
+        // Wires the 9 new feel components (VFX events / audio pool / hitstop /
+        // squash-stretch / screen flash / zone banner / pickup floater / HUD
+        // vignette / finish slow-mo) onto the appropriate scene GameObjects.
+        // Idempotent — running Build twice replaces but does not duplicate.
+        private static void CreateGameFeel(GameObject player, LevelManager levelManager)
+        {
+            var skiing = player.GetComponent<SkiingController>();
+            var glucose = player.GetComponent<GlucoseSystem>();
+            var canvas = UnityEngine.Object.FindObjectOfType<UnityEngine.Canvas>();
+
+            // Player-local: squash-stretch.
+            if (player.GetComponent<PlayerSquashStretch>() == null)
+            {
+                var squash = player.AddComponent<PlayerSquashStretch>();
+                SetField(squash, "_skiingController", skiing);
+            }
+
+            // HUD-side: zone banner, pickup floater, HUD vignette, screen flash.
+            // HudVignette is already a serialized field on HUD (auto-created on Start),
+            // so we just attach the other 3 to the canvas.
+            if (canvas != null)
+            {
+                if (canvas.GetComponent<ZoneChangeBanner>() == null)
+                {
+                    var banner = canvas.gameObject.AddComponent<ZoneChangeBanner>();
+                    SetField(banner, "_parentCanvas", canvas);
+                    SetField(banner, "_glucoseSystem", glucose);
+                }
+                if (canvas.GetComponent<PickupFloater>() == null)
+                {
+                    var floater = canvas.gameObject.AddComponent<PickupFloater>();
+                    SetField(floater, "_parentCanvas", canvas);
+                }
+                if (canvas.GetComponent<ScreenFlash>() == null)
+                {
+                    canvas.gameObject.AddComponent<ScreenFlash>();
+                }
+            }
+
+            // Standalone host: audio + hitstop + finish slow-mo. These don't need
+            // per-frame references — they self-subscribe via FindObjectOfType in
+            // their own Start/OnEnable.
+            var existingHost = GameObject.Find("GameFeelHost");
+            GameObject host = existingHost != null ? existingHost : new GameObject("GameFeelHost");
+            if (host.GetComponent<AudioFeedback>() == null)
+            {
+                var audio = host.AddComponent<AudioFeedback>();
+                SetField(audio, "_skiingController", skiing);
+                SetField(audio, "_glucoseSystem", glucose);
+            }
+            if (host.GetComponent<HitstopController>() == null)
+            {
+                var hitstop = host.AddComponent<HitstopController>();
+                SetField(hitstop, "_skiingController", skiing);
+            }
+            if (host.GetComponent<FinishSlowMotion>() == null)
+            {
+                host.AddComponent<FinishSlowMotion>();
+            }
         }
 
         private static void CreateGlucoseVisionOverlay(Transform canvas, GlucoseSystem glucoseSystem)
