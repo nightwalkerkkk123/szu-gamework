@@ -10,30 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 3}
-  m_Name: L1_Segment_Rocks
+  m_Name: L1_Segment_Intro
   m_EditorClassIdentifier: 
-  <SegmentId>k__BackingField: L1_Rocks
-  <Length>k__BackingField: 60
-  <SlopeAngle>k__BackingField: 12
+  <SegmentId>k__BackingField: L1_Intro
+  <Length>k__BackingField: 250
+  <SlopeAngle>k__BackingField: 8
   <GroundPieceLength>k__BackingField: 12
-  <HasGap>k__BackingField: 1
-  <GapStartRatio>k__BackingField: 0.65
-  <GapEndRatio>k__BackingField: 0.85
+  <HasGap>k__BackingField: 0
+  <GapStartRatio>k__BackingField: 0
+  <GapEndRatio>k__BackingField: 0
   <GapDepth>k__BackingField: 8
   <Obstacles>k__BackingField:
-  - DistanceAlongSegment: 15
+  - DistanceAlongSegment: 180
     HeightOffset: 0.4
     Type: 0
+    HeightMeters: 0
     Size: {x: 0.8, y: 0.8}
     Color: {r: 0.55, g: 0.4, b: 0.35, a: 1}
-  - DistanceAlongSegment: 45
-    HeightOffset: 1.3
-    Type: 0
-    Size: {x: 0.6, y: 0.4}
-    Color: {r: 0.45, g: 0.3, b: 0.2, a: 1}
   <Pickups>k__BackingField:
-  - DistanceAlongSegment: 50
+  - DistanceAlongSegment: 120
     HeightOffset: 1.5
-    ItemEffect: {fileID: 11400000, guid: 6e5c14a3c5d540448a3822b65c98fc0c, type: 2}
-    Color: {r: 0, g: 1, b: 0, a: 1}
+    ItemEffect: {fileID: 11400000, guid: 391f278e3a3db584ba637fda5c3c3b7a, type: 2}
+    Color: {r: 0, g: 0, b: 1, a: 1}
   <Hazards>k__BackingField: []

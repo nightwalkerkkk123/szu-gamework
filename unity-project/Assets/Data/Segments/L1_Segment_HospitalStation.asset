@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 3}
+  m_Name: L1_Segment_HospitalStation
+  m_EditorClassIdentifier: 
+  <SegmentId>k__BackingField: L1_HospitalStation
+  <Length>k__BackingField: 300
+  <SlopeAngle>k__BackingField: 8
+  <GroundPieceLength>k__BackingField: 12
+  <HasGap>k__BackingField: 0
+  <GapStartRatio>k__BackingField: 0
+  <GapEndRatio>k__BackingField: 0
+  <GapDepth>k__BackingField: 8
+  <Obstacles>k__BackingField: []
+  <Pickups>k__BackingField: []
+  <Hazards>k__BackingField: []
