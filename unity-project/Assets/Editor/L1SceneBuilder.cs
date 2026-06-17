@@ -106,30 +106,44 @@ namespace SugarRush.Editor
                     new SegmentObstacle { DistanceAlongSegment = 140f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor }
                 });
 
-            // 3. FirstRoll (250m, 12°) — three Rollable to teach rolling (invuln).
+            // 3. FirstRoll (250m, 12°) — SETPIECE: five Rollable in cascade to teach rolling rhythm.
+            // Spacing 30m aligns with roll cooldown (0.9s) × maxSpeed (16 m/s) ≈ 14.4m minimum gap.
             var segment3 = CreateSegmentAsset($"{folder}/L1_Segment_FirstRoll.asset", "L1_FirstRoll", 250f, 12f,
                 obstacles: new SegmentObstacle[]
                 {
                     new SegmentObstacle { DistanceAlongSegment = 50f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 130f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor }
+                    new SegmentObstacle { DistanceAlongSegment = 80f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 110f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 140f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 170f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor }
                 });
 
-            // 4. ItemTutorial (250m, 12°) — pickup-only, teaches auto-pickup and item use.
-            var segment4 = CreateSegmentAsset($"{folder}/L1_Segment_ItemTutorial.asset", "L1_ItemTutorial", 250f, 12f,
+            // 4. ItemTutorial (250m, 22°) — SETPIECE: visual steepening.
+            // Slope jumped from 12° to 22° for visceral "accelerating downhill" feel.
+            // Note: SkiingController.ApplyDownhillForce uses SkiingConfig.SlopeDirection (12°),
+            // so max-speed cap (16 m/s) is reached identically — the steeper slope only affects
+            // terrain tilt and collision shape. Pure visual drama this round.
+            var segment4 = CreateSegmentAsset($"{folder}/L1_Segment_ItemTutorial.asset", "L1_ItemTutorial", 250f, 22f,
                 pickups: new SegmentPickup[]
                 {
                     new SegmentPickup { DistanceAlongSegment = 80f,  HeightOffset = 1.5f, ItemEffect = insulin,   Color = Color.blue },
                     new SegmentPickup { DistanceAlongSegment = 180f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
                 });
 
-            // 5. Mixed (400m, 10° — breathing slope) — combines Jumpable-tall, Rollable, Stumble, ColdWind, Pills.
+            // 5. Mixed (400m, 10° — breathing slope) — SETPIECE: Long Jump Gap.
+            // 8m cliff at 264-272m (GapStartRatio=0.66, GapEndRatio=0.68). Player must jump or
+            // fall to GapDeathZone (y=-20) → TriggerCrash → ResultPanel restart. Drama: high-speed
+            // approach → sudden chasm → commit to jump or die. Gap is clearable: max jump height
+            // ≈ 4m, horizontal air time ≈ 1.14s × 16 m/s = 18m, so 8m gap is comfortable.
             var segment5 = CreateSegmentAsset($"{folder}/L1_Segment_Mixed.asset", "L1_Mixed", 400f, 10f,
                 obstacles: new SegmentObstacle[]
                 {
                     new SegmentObstacle { DistanceAlongSegment = 100f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 1.4f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
                     new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 320f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble,  Size = new Vector2(0.8f, 0.8f), Color = stumbleColor }
+                    // Warm-up jump just before the gap — primes the player for the big leap.
+                    new SegmentObstacle { DistanceAlongSegment = 230f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    // Landing cushion after the gap (in case player lands rough).
+                    new SegmentObstacle { DistanceAlongSegment = 300f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Stumble,  Size = new Vector2(0.8f, 0.8f), Color = stumbleColor }
                 },
                 pickups: new SegmentPickup[]
                 {
@@ -137,17 +151,23 @@ namespace SugarRush.Editor
                 },
                 hazards: new SegmentHazard[]
                 {
-                    // ColdWind band, ~80m wide, 4m tall, centered at 320m.
+                    // ColdWind band, ~80m wide, 4m tall, centered at 320m (after the gap).
                     new SegmentHazard { DistanceAlongSegment = 320f, CenterHeightOffset = 4f, Size = new Vector2(80f, 4f), DeltaPerSecond = -3f }
-                });
+                },
+                hasGap: true, gapStart: 0.66f, gapEnd: 0.68f);
 
-            // 6. FinalSprint (350m, 16° — peak slope) — Jumpable, Rollable, Avoidable, Snowflake, ColdWind.
+            // 6. FinalSprint (350m, 16° — peak slope) — SETPIECE: Triple Threat Combo.
+            // Tight Rollable → Jumpable → Avoidable at 80/95/110m (15m spacing).
+            // Player rhythm: roll 80m (invuln window) → land → jump 95m → airborne ≈18m
+            // (air time 1.14s × maxSpeed 16 m/s) → pass OVER the 110m Avoidable.
+            // This is the level's "boss fight" — tests whether the player can chain 3 distinct
+            // actions in ~2 seconds.
             var segment6 = CreateSegmentAsset($"{folder}/L1_Segment_FinalSprint.asset", "L1_FinalSprint", 350f, 16f,
                 obstacles: new SegmentObstacle[]
                 {
-                    new SegmentObstacle { DistanceAlongSegment = 80f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable,  HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 160f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable,  Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 280f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Avoidable,  Size = new Vector2(1.2f, 1.2f), Color = avoidableColor }
+                    new SegmentObstacle { DistanceAlongSegment = 80f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable,  Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 95f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable,  HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    new SegmentObstacle { DistanceAlongSegment = 110f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Avoidable,  Size = new Vector2(1.2f, 1.2f), Color = avoidableColor }
                 },
                 pickups: new SegmentPickup[]
                 {
@@ -159,8 +179,19 @@ namespace SugarRush.Editor
                     new SegmentHazard { DistanceAlongSegment = 140f, CenterHeightOffset = 4f, Size = new Vector2(80f, 4f), DeltaPerSecond = -2f }
                 });
 
-            // 7. HospitalStation (300m, 8° — release) — clean approach to the FinishLine.
-            var segment7 = CreateSegmentAsset($"{folder}/L1_Segment_HospitalStation.asset", "L1_HospitalStation", 300f, 8f);
+            // 7. HospitalStation (300m, 8° — release) — SETPIECE: Reward Run.
+            // Three pickups spaced 30m apart (Insulin/Snowflake/Pills at 200/230/260m) — after the
+            // tension of Mixed/FinalSprint the player "drinks from a firehose" of items. Glucose
+            // saturates, snowflake speed boost kicks in, finish at high speed. FinishLine is
+            // raised to +3m Y with a tall 1×6 pillar (see CreateLevelFromSegments) for a
+            // "step onto the podium" visual.
+            var segment7 = CreateSegmentAsset($"{folder}/L1_Segment_HospitalStation.asset", "L1_HospitalStation", 300f, 8f,
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 200f, HeightOffset = 1.5f, ItemEffect = insulin,   Color = Color.blue },
+                    new SegmentPickup { DistanceAlongSegment = 230f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow },
+                    new SegmentPickup { DistanceAlongSegment = 260f, HeightOffset = 1.5f, ItemEffect = pills,     Color = Color.green }
+                });
 
             var segments = new List<LevelSegmentData> { segment1, segment2, segment3, segment4, segment5, segment6, segment7 };
             level.SetSegments(segments);
@@ -431,11 +462,16 @@ namespace SugarRush.Editor
                 currentY -= segmentWorldDY;
             }
 
-            // Finish line at end of last segment
-            Vector3 finishPos = new Vector3(currentX, currentY + 2f, 0f);
-            var finish = CreateSpriteObject(null, "FinishLine", finishPos, new Vector2(1f, 4f), Color.magenta);
+            // Finish line at end of last segment — SETPIECE 5 podium.
+            // Raised to +3m Y (was +2m) and made a tall magenta pillar (1×6 instead of 1×4)
+            // so it visually reads as "step onto the podium" while still triggering reliably.
+            // Sprite/collider center at currentY+3, height 6 → spans currentY+0 to currentY+6,
+            // which overlaps the player AABB (currentY+0 to currentY+1.6) at the bottom edge.
+            Vector3 finishPos = new Vector3(currentX, currentY + 3f, 0f);
+            var finish = CreateSpriteObject(null, "FinishLine", finishPos, new Vector2(1f, 6f), Color.magenta);
             var finishTrigger = finish.AddComponent<BoxCollider2D>();
             finishTrigger.isTrigger = true;
+            finishTrigger.size = new Vector2(1f, 6f);
             finish.AddComponent<FinishLine>();
         }
 
