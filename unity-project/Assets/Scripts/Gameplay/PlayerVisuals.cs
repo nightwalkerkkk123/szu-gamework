@@ -1,12 +1,11 @@
 using SugarRush.Core;
 using SugarRush.Foundation;
-using System.Collections;
 using UnityEngine;
 
 namespace SugarRush.Gameplay
 {
     /// <summary>
-    /// Player visual feedback: color by glucose zone, hurt flash, roll flash, stumble shake.
+    /// Player visual feedback: color by glucose zone, hurt flash, roll flash, stumble shake, shield flash.
     /// </summary>
     public class PlayerVisuals : MonoBehaviour
     {
@@ -27,6 +26,7 @@ namespace SugarRush.Gameplay
         [SerializeField] private Color _rollFlashColor = Color.white;
         [SerializeField] private Color _hurtFlashColor = Color.red;
         [SerializeField] private Color _pickupFlashColor = Color.yellow;
+        [SerializeField] private Color _shieldFlashColor = new Color(0.75f, 0.8f, 0.85f, 1f);
 
         [Header("Shake")]
         [SerializeField] private float _stumbleShakeAmount = 0.15f;
@@ -53,6 +53,7 @@ namespace SugarRush.Gameplay
             {
                 _skiingController.OnRollingChanged += HandleRollingChanged;
                 _skiingController.OnStumbledChanged += HandleStumbledChanged;
+                _skiingController.OnShieldActivated += HandleShieldActivated;
             }
 
             if (_glucoseSystem != null)
@@ -74,6 +75,7 @@ namespace SugarRush.Gameplay
             {
                 _skiingController.OnRollingChanged -= HandleRollingChanged;
                 _skiingController.OnStumbledChanged -= HandleStumbledChanged;
+                _skiingController.OnShieldActivated -= HandleShieldActivated;
             }
 
             if (_glucoseSystem != null)
@@ -91,6 +93,11 @@ namespace SugarRush.Gameplay
         public void TriggerHurtFlash()
         {
             Flash(_hurtFlashColor);
+        }
+
+        public void TriggerShieldFlash()
+        {
+            Flash(_shieldFlashColor);
         }
 
         public void TriggerDeathVisual()
@@ -156,6 +163,11 @@ namespace SugarRush.Gameplay
                 _stumbleTimer = 0.5f;
                 Flash(_hurtFlashColor);
             }
+        }
+
+        private void HandleShieldActivated()
+        {
+            Flash(_shieldFlashColor);
         }
 
         private void HandleZoneChanged(GlucoseZone zone)
