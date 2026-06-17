@@ -16,6 +16,8 @@ namespace SugarRush.Foundation
         [SerializeField] private GameObject _panel;
         [SerializeField] private Button _resumeButton;
         [SerializeField] private Button _restartButton;
+        [SerializeField] private Button _settingsButton;
+        [SerializeField] private SettingsPanel _settingsPanel;
         [SerializeField] private Button _quitButton;
 
         private bool _subscribed;
@@ -101,7 +103,13 @@ namespace SugarRush.Foundation
             // Buttons stacked vertically
             _resumeButton = CreateButton(_panel.transform, "ResumeButton", "继续", 0.40f, 0.50f);
             _restartButton = CreateButton(_panel.transform, "RestartButton", "重新开始", 0.30f, 0.40f);
-            _quitButton = CreateButton(_panel.transform, "QuitButton", "退出", 0.20f, 0.30f);
+            _settingsButton = CreateButton(_panel.transform, "SettingsButton", "设置", 0.20f, 0.30f);
+            _quitButton = CreateButton(_panel.transform, "QuitButton", "退出", 0.10f, 0.20f);
+
+            // Settings panel auto-builds as a sibling sub-panel.
+            var settingsGO = new GameObject("SettingsPanelHost");
+            settingsGO.transform.SetParent(_panel.transform, false);
+            _settingsPanel = settingsGO.AddComponent<SettingsPanel>();
         }
 
         private static Button CreateButton(Transform parent, string name, string label,
@@ -147,6 +155,10 @@ namespace SugarRush.Foundation
             {
                 _restartButton.onClick.AddListener(OnRestartClicked);
             }
+            if (_settingsButton != null)
+            {
+                _settingsButton.onClick.AddListener(OnSettingsClicked);
+            }
             if (_quitButton != null)
             {
                 _quitButton.onClick.AddListener(OnQuitClicked);
@@ -171,6 +183,11 @@ namespace SugarRush.Foundation
             // Resume is just a raised event — PauseMenu listens and hides itself.
             // Time.timeScale is restored by Hide().
             GameEvents.RaiseGameResumed();
+        }
+
+        private void OnSettingsClicked()
+        {
+            if (_settingsPanel != null) _settingsPanel.Show();
         }
 
         private void OnRestartClicked()
