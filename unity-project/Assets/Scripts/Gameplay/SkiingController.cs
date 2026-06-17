@@ -423,5 +423,45 @@ namespace SugarRush.Gameplay
             OnShieldConsumed?.Invoke();
             return true;
         }
+
+        /// <summary>
+        /// Resets runtime player state to a fresh-run baseline without rebuilding
+        /// the scene. Called by RuntimeResetter when the player chooses Restart
+        /// or Retry. Position / velocity / flags / timers all return to start.
+        /// </summary>
+        public void Reset()
+        {
+            // Re-enable in case we were disabled by a crash
+            enabled = true;
+
+            if (_rb != null)
+            {
+                _rb.velocity = Vector2.zero;
+                _rb.angularVelocity = 0f;
+                _rb.gravityScale = _config != null ? _config.gravityScale : 1f;
+            }
+
+            _isRolling = false;
+            _isStumbled = false;
+            _shieldActive = false;
+            _coyoteTimer = 0f;
+            _jumpBufferTimer = 0f;
+
+            // Force timers to expire so EndRoll / EndStumble callbacks fire and
+            // the system resyncs to a clean state.
+            if (_rollTimer != null) _rollTimer.ForceExpire();
+            if (_stumbleTimer != null) _stumbleTimer.ForceExpire();
+            if (_rollCooldownTimer != null) _rollCooldownTimer.ForceExpire();
+
+            transform.rotation = Quaternion.identity;
+            if (_hitbox != null)
+            {
+                _hitbox.size = _standingHitboxSize;
+                _hitbox.offset = _standingHitboxOffset;
+            }
+
+            OnRollingChanged?.Invoke(false);
+            OnStumbledChanged?.Invoke(false);
+        }
     }
 }

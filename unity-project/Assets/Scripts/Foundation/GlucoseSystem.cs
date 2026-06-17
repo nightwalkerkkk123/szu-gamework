@@ -57,6 +57,36 @@ namespace SugarRush.Foundation
             UpdateZone(true);
         }
 
+        /// <summary>
+        /// Resets glucose value, modifiers, and active buffs to a fresh-run baseline.
+        /// Does not touch the underlying GlucoseConfig asset.
+        /// </summary>
+        public void Reset()
+        {
+            if (_config == null) return;
+
+            // Clear any active buffs and unregister their timers.
+            if (TimerService.Instance != null)
+            {
+                foreach (var buff in _activeBuffs)
+                {
+                    TimerService.Instance.Unregister(buff.Timer);
+                }
+            }
+            _activeBuffs.Clear();
+            _passiveDeltaPerSecond = 0f;
+
+            _currentValue = _config.startValue;
+            _lowCrisisTimer = 0f;
+            _highCrisisTimer = 0f;
+            SpeedModifier = 1f;
+            ControlModifier = 1f;
+            VisionModifier = 1f;
+
+            UpdateZone(true);
+            OnValueChanged?.Invoke(_currentValue);
+        }
+
         private void OnEnable()
         {
             foreach (var buff in _activeBuffs)

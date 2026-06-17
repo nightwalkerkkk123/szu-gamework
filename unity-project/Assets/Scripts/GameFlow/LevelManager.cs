@@ -92,5 +92,27 @@ namespace SugarRush.GameFlow
         public float NormalizedProgress => _levelData != null && _levelData.TargetDistanceMeters > 0f
             ? Mathf.Clamp01(DistanceTraveled / _levelData.TargetDistanceMeters)
             : 0f;
+
+        /// <summary>
+        /// Resets run-level counters and snaps the player back to the start point.
+        /// Does not reload the level data asset or rebuild the scene.
+        /// </summary>
+        public void Reset()
+        {
+            ElapsedTime = 0f;
+            DistanceTraveled = 0f;
+
+            ResolvePlayerReferences();
+
+            if (_startPoint != null && _player != null)
+            {
+                _player.position = _startPoint.position;
+            }
+
+            if (_player != null)
+            {
+                _lastPosition = _player.position;
+            }
+        }
     }
 }
