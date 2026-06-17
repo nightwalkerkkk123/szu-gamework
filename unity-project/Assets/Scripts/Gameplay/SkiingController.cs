@@ -244,6 +244,7 @@ namespace SugarRush.Gameplay
 
         private void QueueJump()
         {
+            Debug.Log($"[SkiingController-DIAG] QueueJump entered. enabled={enabled} _isStumbled={_isStumbled} _isRolling={_isRolling}", this);
             if (!enabled || _isStumbled) return;
             _jumpBufferTimer = _config.jumpBufferTime;
             TryFireJump();
@@ -375,7 +376,7 @@ namespace SugarRush.Gameplay
             _isStumbled = false;
             transform.rotation = Quaternion.identity;
             OnStumbledChanged?.Invoke(false);
-            Debug.Log("[SkiingController] Stumble ended.", this);
+            Debug.Log("[SkiingController-DIAG] EndStumble fired. _isStumbled=false", this);
         }
 
         public void SetEnabled(bool enabled)
