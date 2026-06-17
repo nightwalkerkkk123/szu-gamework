@@ -17,7 +17,13 @@ namespace SugarRush.Gameplay
     /// <item><b>Rollable</b> — safe if the player is rolling at contact. No-op
     /// otherwise (stumble).</item>
     /// <item><b>Avoidable</b> — any contact crashes; no jump or roll invuln applies.</item>
+    /// <item><b>Ramp</b> — trigger only. Launches the player upward with a vertical
+    /// impulse (jumpForce × 1.2) for a positive setpiece moment.</item>
+    /// <item><b>Spike</b> — safe if rolling; otherwise <see cref="SkiingController.TriggerCrash"/>.
+    /// Stricter than Rollable (which only stumbles on miss).</item>
     /// </list>
+    /// Ramp is the only type that uses <see cref="OnTriggerEnter2D"/>; the
+    /// builder must set its <see cref="BoxCollider2D.isTrigger"/> to true.
     /// </remarks>
     public class Obstacle : MonoBehaviour
     {
@@ -28,12 +34,17 @@ namespace SugarRush.Gameplay
             Jumpable,
             Rollable,
             Avoidable,
+            Ramp,
+            Spike,
         }
 
         [SerializeField] private ObstacleType _type = ObstacleType.Stumble;
 
         [Tooltip("For Jumpable: required clearance in meters. 0 = any jump clears. >0 = player must jump high enough to clear this height; otherwise stumble.")]
         [SerializeField] private float _heightMeters = 0f;
+
+        [Tooltip("Ramp launch impulse multiplier vs SkiingConfig.jumpForce. Only used by Ramp type.")]
+        [SerializeField, Min(0.5f)] private float _rampImpulseMultiplier = 1.2f;
 
         public ObstacleType Type => _type;
 
@@ -54,7 +65,7 @@ namespace SugarRush.Gameplay
                 return;
             }
 
-            // Roll invuln applies to Stumble/Crash/Jumpable/Rollable uniformly.
+            // Roll invuln applies to Stumble/Crash/Jumpable/Rollable/Spike uniformly.
             if (controller.IsRolling)
                 return;
 
@@ -81,7 +92,25 @@ namespace SugarRush.Gameplay
                     ApplyHitFeedback(collision, controller);
                     controller.TriggerStumble();
                     return;
+
+                case ObstacleType.Spike:
+                    // Stricter than Rollable: missing the roll = Crash, not Stumble.
+                    ApplyHitFeedback(collision, controller);
+                    controller.TriggerCrash();
+                    return;
             }
+        }
+
+        // Ramp uses a trigger collider (set by L1SceneBuilder) so the player passes through
+        // while still receiving the upward impulse. All other types stay on collision.
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (_type != ObstacleType.Ramp) return;
+            if (!other.CompareTag("Player")) return;
+            if (!other.TryGetComponent<SkiingController>(out var controller)) return;
+            if (controller.Config == null) return;
+
+            controller.ApplyExternalImpulse(Vector2.up * controller.Config.jumpForce * _rampImpulseMultiplier);
         }
 
         private void ApplyHitFeedback(Collision2D collision, SkiingController controller)

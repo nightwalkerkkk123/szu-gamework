@@ -24,11 +24,12 @@ namespace SugarRush.Editor
             SceneManager.SetActiveScene(scene);
 
             LoadAssets(out var glucoseConfig, out var skiingConfig, out var levelData,
-                out var insulin, out var pills, out var snowflake, out var slipperyGround);
+                out var insulin, out var pills, out var snowflake,
+                out var shield, out var magnet, out var slipperyGround);
 
             GameConfig.Initialize(glucoseConfig, skiingConfig, levelData);
 
-            var segments = EnsureSegments(levelData, insulin, pills, snowflake);
+            var segments = EnsureSegments(levelData, insulin, pills, snowflake, shield, magnet);
 
             var player = CreatePlayer(glucoseConfig, skiingConfig, slipperyGround);
             var inputGo = CreateInput();
@@ -59,7 +60,8 @@ namespace SugarRush.Editor
 
         private static void LoadAssets(out GlucoseConfig glucose, out SkiingConfig skiing,
             out LevelData level, out InsulinSprayEffect insulin, out HypoglycemicPillsEffect pills,
-            out HighSugarSnowflakeEffect snowflake, out PhysicsMaterial2D slipperyGround)
+            out HighSugarSnowflakeEffect snowflake, out ShieldEffect shield, out MagnetEffect magnet,
+            out PhysicsMaterial2D slipperyGround)
         {
             glucose = AssetDatabase.LoadAssetAtPath<GlucoseConfig>("Assets/Data/Configs/GlucoseConfig.asset");
             skiing = AssetDatabase.LoadAssetAtPath<SkiingConfig>("Assets/Data/Configs/SkiingConfig.asset");
@@ -67,11 +69,14 @@ namespace SugarRush.Editor
             insulin = AssetDatabase.LoadAssetAtPath<InsulinSprayEffect>("Assets/Data/Items/InsulinSpray.asset");
             pills = AssetDatabase.LoadAssetAtPath<HypoglycemicPillsEffect>("Assets/Data/Items/HypoglycemicPills.asset");
             snowflake = AssetDatabase.LoadAssetAtPath<HighSugarSnowflakeEffect>("Assets/Data/Items/HighSugarSnowflake.asset");
+            shield = AssetDatabase.LoadAssetAtPath<ShieldEffect>("Assets/Data/Items/Shield.asset");
+            magnet = AssetDatabase.LoadAssetAtPath<MagnetEffect>("Assets/Data/Items/Magnet.asset");
             slipperyGround = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>("Assets/Data/PhysicsMaterials/SlipperyGround.physicsMaterial2D");
         }
 
         private static List<LevelSegmentData> EnsureSegments(LevelData level,
-            InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake)
+            InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake,
+            ShieldEffect shield, MagnetEffect magnet)
         {
             string folder = "Assets/Data/Segments";
             EnsureFolder(folder);
@@ -86,6 +91,8 @@ namespace SugarRush.Editor
             Color jumpableColor = new Color(0.4f, 0.65f, 0.3f);
             Color rollableColor = new Color(0.3f, 0.2f, 0.1f);
             Color avoidableColor = new Color(0.8f, 0.2f, 0.15f);
+            Color rampColor = new Color(0.3f, 0.6f, 0.9f);     // light blue — positive pickup-like
+            Color spikeColor = new Color(0.7f, 0.1f, 0.1f);    // deep red — danger
 
             // 1. Intro (250m, gentle 8° slope) — single low Stumble, first Insulin pickup.
             var segment1 = CreateSegmentAsset($"{folder}/L1_Segment_Intro.asset", "L1_Intro", 250f, 8f,
@@ -123,11 +130,13 @@ namespace SugarRush.Editor
             // Note: SkiingController.ApplyDownhillForce uses SkiingConfig.SlopeDirection (12°),
             // so max-speed cap (16 m/s) is reached identically — the steeper slope only affects
             // terrain tilt and collision shape. Pure visual drama this round.
+            // Variety: add Magnet at 220m to teach the magnet item before later pickup runs.
             var segment4 = CreateSegmentAsset($"{folder}/L1_Segment_ItemTutorial.asset", "L1_ItemTutorial", 250f, 22f,
                 pickups: new SegmentPickup[]
                 {
                     new SegmentPickup { DistanceAlongSegment = 80f,  HeightOffset = 1.5f, ItemEffect = insulin,   Color = Color.blue },
-                    new SegmentPickup { DistanceAlongSegment = 180f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
+                    new SegmentPickup { DistanceAlongSegment = 180f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow },
+                    new SegmentPickup { DistanceAlongSegment = 220f, HeightOffset = 1.5f, ItemEffect = magnet,    Color = new Color(0.7f, 0.3f, 0.9f) }
                 });
 
             // 5. Mixed (400m, 10° — breathing slope) — SETPIECE: Long Jump Gap.
@@ -135,10 +144,14 @@ namespace SugarRush.Editor
             // fall to GapDeathZone (y=-20) → TriggerCrash → ResultPanel restart. Drama: high-speed
             // approach → sudden chasm → commit to jump or die. Gap is clearable: max jump height
             // ≈ 4m, horizontal air time ≈ 1.14s × 16 m/s = 18m, so 8m gap is comfortable.
+            // Variety: Spike at 130m introduces "must-roll" tension; Shield at 70m gives a
+            // safety net for the upcoming gap or Spike.
             var segment5 = CreateSegmentAsset($"{folder}/L1_Segment_Mixed.asset", "L1_Mixed", 400f, 10f,
                 obstacles: new SegmentObstacle[]
                 {
                     new SegmentObstacle { DistanceAlongSegment = 100f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 1.4f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
+                    // New: Spike — must-roll obstacle (Crash on miss, not Stumble).
+                    new SegmentObstacle { DistanceAlongSegment = 130f, HeightOffset = 0.3f, Type = Obstacle.ObstacleType.Spike,    Size = new Vector2(0.4f, 0.6f), Color = spikeColor },
                     new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
                     // Warm-up jump just before the gap — primes the player for the big leap.
                     new SegmentObstacle { DistanceAlongSegment = 230f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable, HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
@@ -147,7 +160,9 @@ namespace SugarRush.Editor
                 },
                 pickups: new SegmentPickup[]
                 {
-                    new SegmentPickup { DistanceAlongSegment = 250f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green }
+                    // New: Shield — equips to inventory; player presses use key to activate.
+                    new SegmentPickup { DistanceAlongSegment = 70f,  HeightOffset = 1.5f, ItemEffect = shield, Color = new Color(0.85f, 0.85f, 0.95f) },
+                    new SegmentPickup { DistanceAlongSegment = 250f, HeightOffset = 1.5f, ItemEffect = pills,  Color = Color.green }
                 },
                 hazards: new SegmentHazard[]
                 {
@@ -162,12 +177,19 @@ namespace SugarRush.Editor
             // (air time 1.14s × maxSpeed 16 m/s) → pass OVER the 110m Avoidable.
             // This is the level's "boss fight" — tests whether the player can chain 3 distinct
             // actions in ~2 seconds.
+            // Variety: Ramp at 180m and 320m provide rewarding launches between the boss fight
+            // and the finish line. Spike at 250m punishes greedy players post-Triple-Threat.
             var segment6 = CreateSegmentAsset($"{folder}/L1_Segment_FinalSprint.asset", "L1_FinalSprint", 350f, 16f,
                 obstacles: new SegmentObstacle[]
                 {
                     new SegmentObstacle { DistanceAlongSegment = 80f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable,  Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
                     new SegmentObstacle { DistanceAlongSegment = 95f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Jumpable,  HeightMeters = 0f, Size = new Vector2(0.9f, 0.4f), Color = jumpableColor },
-                    new SegmentObstacle { DistanceAlongSegment = 110f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Avoidable,  Size = new Vector2(1.2f, 1.2f), Color = avoidableColor }
+                    new SegmentObstacle { DistanceAlongSegment = 110f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Avoidable,  Size = new Vector2(1.2f, 1.2f), Color = avoidableColor },
+                    // New: rewarding Ramp launches.
+                    new SegmentObstacle { DistanceAlongSegment = 180f, HeightOffset = 0.3f, Type = Obstacle.ObstacleType.Ramp,       Size = new Vector2(1.8f, 0.5f), Color = rampColor },
+                    // New: Spike — must roll, otherwise crash.
+                    new SegmentObstacle { DistanceAlongSegment = 250f, HeightOffset = 0.3f, Type = Obstacle.ObstacleType.Spike,      Size = new Vector2(0.4f, 0.6f), Color = spikeColor },
+                    new SegmentObstacle { DistanceAlongSegment = 320f, HeightOffset = 0.3f, Type = Obstacle.ObstacleType.Ramp,       Size = new Vector2(1.8f, 0.5f), Color = rampColor }
                 },
                 pickups: new SegmentPickup[]
                 {
@@ -185,9 +207,16 @@ namespace SugarRush.Editor
             // saturates, snowflake speed boost kicks in, finish at high speed. FinishLine is
             // raised to +3m Y with a tall 1×6 pillar (see CreateLevelFromSegments) for a
             // "step onto the podium" visual.
+            // Variety: Ramp at 130m for one last celebratory launch; Shield at 100m as a final
+            // safety net for any straggler obstacles.
             var segment7 = CreateSegmentAsset($"{folder}/L1_Segment_HospitalStation.asset", "L1_HospitalStation", 300f, 8f,
+                obstacles: new SegmentObstacle[]
+                {
+                    new SegmentObstacle { DistanceAlongSegment = 130f, HeightOffset = 0.3f, Type = Obstacle.ObstacleType.Ramp, Size = new Vector2(1.8f, 0.5f), Color = rampColor }
+                },
                 pickups: new SegmentPickup[]
                 {
+                    new SegmentPickup { DistanceAlongSegment = 100f, HeightOffset = 1.5f, ItemEffect = shield,    Color = new Color(0.85f, 0.85f, 0.95f) },
                     new SegmentPickup { DistanceAlongSegment = 200f, HeightOffset = 1.5f, ItemEffect = insulin,   Color = Color.blue },
                     new SegmentPickup { DistanceAlongSegment = 230f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow },
                     new SegmentPickup { DistanceAlongSegment = 260f, HeightOffset = 1.5f, ItemEffect = pills,     Color = Color.green }
@@ -438,9 +467,16 @@ namespace SugarRush.Editor
                 {
                     Vector3 pos = EvaluateSegmentPosition(currentX, currentY, segment.Length, segment.SlopeAngle, obstacle.DistanceAlongSegment, obstacle.HeightOffset);
                     var go = CreateSpriteObject(obstaclesRoot.transform, obstacle.Type.ToString(), pos, obstacle.Size, obstacle.Color);
-                    go.AddComponent<BoxCollider2D>();
+                    var box = go.AddComponent<BoxCollider2D>();
+                    // Ramp passes through the player so it can launch without blocking; all
+                    // other obstacle types use solid collision for normal hit dispatch.
+                    if (obstacle.Type == Obstacle.ObstacleType.Ramp)
+                    {
+                        box.isTrigger = true;
+                    }
                     var obs = go.AddComponent<Obstacle>();
                     SetField(obs, "_type", obstacle.Type);
+                    SetField(obs, "_heightMeters", obstacle.HeightMeters);
                 }
 
                 // Place pickups

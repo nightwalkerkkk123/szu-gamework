@@ -25,6 +25,7 @@ namespace SugarRush.Gameplay
         private bool _wasGrounded;
         private bool _isRolling;
         private bool _isStumbled;
+        private bool _shieldActive;
         private float _coyoteTimer;
         private float _jumpBufferTimer;
         private Vector2 _standingHitboxSize;
@@ -33,6 +34,7 @@ namespace SugarRush.Gameplay
         public bool IsGrounded => _isGrounded;
         public bool IsRolling => _isRolling;
         public bool IsStumbled => _isStumbled;
+        public bool ShieldActive => _shieldActive;
         public Vector2 Velocity => _rb.velocity;
         public float Speed => _rb.velocity.magnitude;
         public SkiingConfig Config => _config;
@@ -42,6 +44,8 @@ namespace SugarRush.Gameplay
         public event Action<bool> OnStumbledChanged;
         public event Action OnJumped;
         public event Action OnLanded;
+        public event Action OnShieldActivated;
+        public event Action OnShieldConsumed;
 
         private void Awake()
         {
@@ -310,6 +314,15 @@ namespace SugarRush.Gameplay
         {
             if (_isRolling) return; // invulnerable
 
+            // Shield is consumed BEFORE stumble takes effect — preserves the
+            // "one free hit" feel. Avoidable Crash also consumes shield (see
+            // TriggerCrash). Plan §3.3: simplified version, shield blocks all.
+            if (TryConsumeShield())
+            {
+                Debug.Log("[SkiingController] Shield blocked stumble.", this);
+                return;
+            }
+
             _isStumbled = true;
             OnStumbledChanged?.Invoke(true);
             _stumbleTimer.Reset(_config.stumbleDuration);
@@ -329,6 +342,14 @@ namespace SugarRush.Gameplay
         {
             if (_isRolling) return; // invulnerable
             if (!enabled) return;   // already crashed
+
+            // Shield blocks crash too — see plan §3.3. This includes Avoidable contacts
+            // for now; tighten after playtest if it feels too forgiving.
+            if (TryConsumeShield())
+            {
+                Debug.Log("[SkiingController] Shield blocked crash.", this);
+                return;
+            }
 
             if (TryGetComponent<SimpleParticleSpawner>(out var spawner))
             {
@@ -364,6 +385,42 @@ namespace SugarRush.Gameplay
             {
                 _rb.velocity = Vector2.zero;
             }
+        }
+
+        /// <summary>
+        /// Applies an external impulse to the player rigidbody (e.g. from a Ramp).
+        /// Reuses <see cref="OnJumped"/> so trail/SFX hooks fire automatically.
+        /// </summary>
+        public void ApplyExternalImpulse(Vector2 impulse)
+        {
+            if (!enabled || _rb == null) return;
+            _rb.AddForce(impulse, ForceMode2D.Impulse);
+            // Reset coyote so the next manual jump starts a fresh window after launch.
+            _coyoteTimer = 0f;
+            OnJumped?.Invoke();
+        }
+
+        /// <summary>
+        /// Activates a one-shot shield. The next Stumble or Crash is blocked
+        /// (see <see cref="TryConsumeShield"/>). No-op if shield already active.
+        /// </summary>
+        public void ActivateShield()
+        {
+            if (_shieldActive) return;
+            _shieldActive = true;
+            OnShieldActivated?.Invoke();
+        }
+
+        /// <summary>
+        /// Consumes the shield if active. Returns true if the caller should treat
+        /// the hit as "blocked" and skip the negative effect.
+        /// </summary>
+        public bool TryConsumeShield()
+        {
+            if (!_shieldActive) return false;
+            _shieldActive = false;
+            OnShieldConsumed?.Invoke();
+            return true;
         }
     }
 }
