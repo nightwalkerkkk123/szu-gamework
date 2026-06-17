@@ -133,11 +133,11 @@ namespace SugarRush.Gameplay
             if (_coyoteTimer > 0f) _coyoteTimer -= Time.deltaTime;
             if (_jumpBufferTimer > 0f) _jumpBufferTimer -= Time.deltaTime;
 
-            // Try buffered jump if now grounded or within coyote time.
-            if (_jumpBufferTimer > 0f && CanJump())
+            // Try buffered jump — held over from the previous frame, fires when
+            // the player is grounded/coyote and not currently rolling.
+            if (_jumpBufferTimer > 0f)
             {
-                ExecuteJump();
-                _jumpBufferTimer = 0f;
+                TryFireJump();
             }
         }
 
@@ -240,14 +240,20 @@ namespace SugarRush.Gameplay
 
         private void QueueJump()
         {
-            if (!enabled || _isStumbled || _isRolling) return;
+            if (!enabled || _isStumbled) return;
             _jumpBufferTimer = _config.jumpBufferTime;
+            TryFireJump();
+        }
 
-            if (CanJump())
-            {
-                ExecuteJump();
-                _jumpBufferTimer = 0f;
-            }
+        private void TryFireJump()
+        {
+            // Wait for roll to end before firing — rolling has its own invuln
+            // window and the player usually wants to chain roll → jump, not
+            // jump-while-rolling.
+            if (_isRolling) return;
+            if (!CanJump()) return;
+            ExecuteJump();
+            _jumpBufferTimer = 0f;
         }
 
         private bool CanJump()

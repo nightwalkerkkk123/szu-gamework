@@ -80,9 +80,11 @@ namespace SugarRush.Editor
             DeleteSegmentAssets(folder);
 
             // Per-obstacle-type colors (placeholder sprites; helps the player read intent at a glance).
+            // Rollable was previously a blue-gray (0.4, 0.5, 0.6) which blended
+            // into the sky background (0.76, 0.88, 0.95) — now a dark wood tone.
             Color stumbleColor = new Color(0.55f, 0.4f, 0.35f);
             Color jumpableColor = new Color(0.4f, 0.65f, 0.3f);
-            Color rollableColor = new Color(0.4f, 0.5f, 0.6f);
+            Color rollableColor = new Color(0.3f, 0.2f, 0.1f);
             Color avoidableColor = new Color(0.8f, 0.2f, 0.15f);
 
             // 1. Intro (250m, gentle 8° slope) — single low Stumble, first Insulin pickup.
