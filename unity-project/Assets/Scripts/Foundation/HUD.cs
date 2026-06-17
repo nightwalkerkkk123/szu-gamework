@@ -41,8 +41,24 @@ namespace SugarRush.Foundation
         [SerializeField] private Color _highWarningColor = new Color(1f, 0.6f, 0f);
         [SerializeField] private Color _highCrisisColor = new Color(0.85f, 0.2f, 0.85f);
 
+        [Header("Juice effects")]
+        [SerializeField] private HudVignette _vignette;
+
         private IPlayerController PlayerController => _playerController as IPlayerController;
         private SkiingController _skiingConcrete;
+
+        // Smooth glucose bar lerp state
+        private float _targetGlucose;
+        private float _displayedGlucose;
+
+        // Smooth distance count-up state
+        private float _displayedDistance;
+
+        // Lerp speeds (units per second)
+        private const float GlucoseLerpSpeed = 60f;
+        private const float DistanceLerpSpeed = 30f;
+
+        private Canvas _hudCanvas;
 
         private void Awake()
         {
@@ -73,8 +89,10 @@ namespace SugarRush.Foundation
         {
             if (_glucoseSystem != null)
             {
-                _glucoseSystem.OnValueChanged += UpdateGlucoseBar;
+                _glucoseSystem.OnValueChanged += OnGlucoseValueChanged;
                 _glucoseSystem.OnZoneChanged += UpdateGlucoseColor;
+                _targetGlucose = _glucoseSystem.CurrentValue;
+                _displayedGlucose = _glucoseSystem.CurrentValue;
                 UpdateGlucoseBar(_glucoseSystem.CurrentValue);
                 UpdateGlucoseColor(_glucoseSystem.CurrentZone);
             }
@@ -84,7 +102,7 @@ namespace SugarRush.Foundation
         {
             if (_glucoseSystem != null)
             {
-                _glucoseSystem.OnValueChanged -= UpdateGlucoseBar;
+                _glucoseSystem.OnValueChanged -= OnGlucoseValueChanged;
                 _glucoseSystem.OnZoneChanged -= UpdateGlucoseColor;
             }
         }
@@ -114,6 +132,17 @@ namespace SugarRush.Foundation
         private void Start()
         {
             SubscribeSkiing();
+            EnsureVignette();
+        }
+
+        private void EnsureVignette()
+        {
+            if (_vignette == null)
+            {
+                var go = new GameObject("HudVignette");
+                go.transform.SetParent(_hudCanvas != null ? _hudCanvas.transform : transform, false);
+                _vignette = go.AddComponent<HudVignette>();
+            }
         }
 
         private void EnsureUI()
@@ -124,9 +153,9 @@ namespace SugarRush.Foundation
 
             var canvas = new GameObject("SugarRushHUD");
             canvas.transform.SetParent(transform, false);
-            var cv = canvas.AddComponent<Canvas>();
-            cv.renderMode = RenderMode.ScreenSpaceOverlay;
-            cv.sortingOrder = 100;
+            _hudCanvas = canvas.AddComponent<Canvas>();
+            _hudCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _hudCanvas.sortingOrder = 100;
             canvas.AddComponent<CanvasScaler>();
             canvas.AddComponent<GraphicRaycaster>();
 
@@ -297,13 +326,29 @@ namespace SugarRush.Foundation
 
         private void Update()
         {
+            // Smooth glucose bar lerp
+            if (Mathf.Abs(_displayedGlucose - _targetGlucose) > 0.01f)
+            {
+                _displayedGlucose = Mathf.MoveTowards(_displayedGlucose, _targetGlucose,
+                    GlucoseLerpSpeed * Time.deltaTime);
+                if (_glucoseSlider != null)
+                {
+                    _glucoseSlider.value = Mathf.Clamp(_displayedGlucose, 0f, _glucoseSlider.maxValue);
+                }
+            }
+
             // Distance / time
             if (_levelManager != null)
             {
-                float distance = _levelManager.DistanceTraveled;
+                float actualDistance = _levelManager.DistanceTraveled;
+
+                // Smooth distance count-up
+                _displayedDistance = Mathf.MoveTowards(_displayedDistance, actualDistance,
+                    DistanceLerpSpeed * Time.deltaTime);
+
                 float target = _levelManager.Data != null ? _levelManager.Data.TargetDistanceMeters : 0f;
-                float progress = target > 0f ? Mathf.Clamp01(distance / target) * 100f : 0f;
-                SetText(_distanceText, $"距离: {distance:F0}m / {target:F0}m ({progress:F0}%)");
+                float progress = target > 0f ? Mathf.Clamp01(_displayedDistance / target) * 100f : 0f;
+                SetText(_distanceText, $"距离: {_displayedDistance:F0}m / {target:F0}m ({progress:F0}%)");
                 SetText(_timeText, $"时间: {_levelManager.ElapsedTime:F1}s");
                 if (_distanceProgressFill != null)
                 {
@@ -327,7 +372,7 @@ namespace SugarRush.Foundation
                 SetText(_speedText, "速度: --");
             }
 
-            // Glucose text (bar updates via event)
+            // Glucose text (bar updates via lerp, text shows current actual value)
             if (_glucoseSystem != null)
             {
                 SetText(_glucoseText, $"血糖: {_glucoseSystem.CurrentValue:F0} ({_glucoseSystem.CurrentZone})");
@@ -344,12 +389,9 @@ namespace SugarRush.Foundation
             }
         }
 
-        private void UpdateGlucoseBar(float value)
+        private void OnGlucoseValueChanged(float newValue)
         {
-            if (_glucoseSlider != null)
-            {
-                _glucoseSlider.value = Mathf.Clamp(value, 0f, _glucoseSlider.maxValue);
-            }
+            _targetGlucose = newValue;
         }
 
         private void UpdateGlucoseColor(GlucoseZone zone)
