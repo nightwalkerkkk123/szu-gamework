@@ -46,6 +46,8 @@ namespace SugarRush.Gameplay
         public event Action OnLanded;
         public event Action OnShieldActivated;
         public event Action OnShieldConsumed;
+        public event Action OnCrashed;
+        public event Action<Vector2> OnExternalImpulse;
 
         private void Awake()
         {
@@ -244,7 +246,6 @@ namespace SugarRush.Gameplay
 
         private void QueueJump()
         {
-            Debug.Log($"[SkiingController-DIAG] QueueJump entered. enabled={enabled} _isStumbled={_isStumbled} _isRolling={_isRolling}", this);
             if (!enabled || _isStumbled) return;
             _jumpBufferTimer = _config.jumpBufferTime;
             TryFireJump();
@@ -368,6 +369,7 @@ namespace SugarRush.Gameplay
             _rb.gravityScale = 0f;
 
             SugarRush.Core.GameEvents.RaiseGameFinished(false);
+            OnCrashed?.Invoke();
             Debug.Log("[SkiingController] Crashed.", this);
         }
 
@@ -376,7 +378,7 @@ namespace SugarRush.Gameplay
             _isStumbled = false;
             transform.rotation = Quaternion.identity;
             OnStumbledChanged?.Invoke(false);
-            Debug.Log("[SkiingController-DIAG] EndStumble fired. _isStumbled=false", this);
+            Debug.Log("[SkiingController] EndStumble fired.", this);
         }
 
         public void SetEnabled(bool enabled)
@@ -399,6 +401,7 @@ namespace SugarRush.Gameplay
             // Reset coyote so the next manual jump starts a fresh window after launch.
             _coyoteTimer = 0f;
             OnJumped?.Invoke();
+            OnExternalImpulse?.Invoke(impulse);
         }
 
         /// <summary>
