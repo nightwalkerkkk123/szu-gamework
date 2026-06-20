@@ -690,11 +690,12 @@ namespace SugarRush.Editor
         private static void CreateGapDeathZone()
         {
             var go = new GameObject("GapDeathZone");
-            go.transform.position = new Vector3(0f, -20f, 0f);
+            // Place well below the entire downhill track (which reaches ~-350 at 2000m).
+            go.transform.position = new Vector3(0f, -500f, 0f);
 
             var col = go.AddComponent<BoxCollider2D>();
             col.isTrigger = true;
-            col.size = new Vector2(1000f, 10f);
+            col.size = new Vector2(5000f, 20f);
 
             go.AddComponent<GapDeathZone>();
         }
