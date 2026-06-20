@@ -241,13 +241,13 @@ namespace SugarRush.Editor
 
             var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
 
-            // Body — blue ski jacket
+            // Body — white ski jacket
             var bodyGO = new GameObject("Body");
             bodyGO.transform.SetParent(go.transform);
             bodyGO.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             var bodySR = bodyGO.AddComponent<SpriteRenderer>();
             bodySR.sprite = whiteSprite;
-            bodySR.color = new Color(0.15f, 0.3f, 0.75f, 1f);
+            bodySR.color = Color.white;
             bodySR.drawMode = SpriteDrawMode.Sliced;
             bodySR.size = new Vector2(0.65f, 1.1f);
             bodySR.sortingOrder = 1;
@@ -291,9 +291,6 @@ namespace SugarRush.Editor
             sr.color = new Color(1f, 1f, 1f, 0f); // invisible — children provide the visuals
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
-
-            CreateSki(go.transform, new Vector2(-0.25f, -0.75f));
-            CreateSki(go.transform, new Vector2(0.25f, -0.75f));
 
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 2.5f;
@@ -342,9 +339,10 @@ namespace SugarRush.Editor
         {
             var camGo = new GameObject("MainCamera");
             var camera = camGo.AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
             camera.orthographic = true;
             camera.orthographicSize = 6f;
-            camera.backgroundColor = new Color(0.76f, 0.88f, 0.95f);
+            camera.backgroundColor = new Color(0.45f, 0.7f, 0.95f);
             camGo.transform.position = new Vector3(0f, 2f, -10f);
             camGo.tag = "MainCamera";
 
@@ -381,47 +379,26 @@ namespace SugarRush.Editor
 
         private static void CreateBackground()
         {
-            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+            var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
+            var camGo = GameObject.Find("MainCamera");
+            if (camGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
+
+            // 3D sprite background attached to camera with fixed large scale
+            // (avoids edge bleeding from varying game-view aspect ratios)
             var bgRoot = new GameObject("Background");
+            bgRoot.transform.SetParent(camGo.transform);
+            bgRoot.transform.localPosition = new Vector3(0f, 0f, 20f);
 
-            // Sky gradient (far background)
-            var sky = new GameObject("Sky");
-            sky.transform.SetParent(bgRoot.transform);
-            sky.transform.position = new Vector3(90f, 3f, 15f);
-            var skySR = sky.AddComponent<SpriteRenderer>();
-            skySR.sprite = whiteSprite;
-            skySR.color = new Color(0.7f, 0.85f, 0.95f, 1f);
-            skySR.drawMode = SpriteDrawMode.Tiled;
-            skySR.size = new Vector2(60f, 12f);
-            skySR.sortingOrder = -30;
-            skySR.tileMode = SpriteTileMode.Continuous;
+            var mountain = new GameObject("MountainBG");
+            mountain.transform.SetParent(bgRoot.transform);
+            mountain.transform.localPosition = Vector3.zero;
+            mountain.transform.localScale = new Vector3(20f, 20f, 1f);
 
-            // Far mountains
-            for (int i = 0; i < 4; i++)
-            {
-                var mountain = new GameObject($"Mountain_Far_{i}");
-                mountain.transform.SetParent(bgRoot.transform);
-                mountain.transform.position = new Vector3(-20 + i * 55f, -2f - i * 0.5f, 12f);
-                var sr = mountain.AddComponent<SpriteRenderer>();
-                sr.sprite = whiteSprite;
-                sr.color = new Color(0.5f + i * 0.05f, 0.6f + i * 0.05f, 0.75f + i * 0.05f, 1f);
-                sr.drawMode = SpriteDrawMode.Tiled;
-                sr.tileMode = SpriteTileMode.Continuous;
-                sr.size = new Vector2(20f, 4f + i * 1.5f);
-                sr.sortingOrder = -25 + i;
-            }
-
-            // Snow-covered ground plane at horizon
-            var snowPlain = new GameObject("SnowPlain");
-            snowPlain.transform.SetParent(bgRoot.transform);
-            snowPlain.transform.position = new Vector3(90f, -4f, 10f);
-            var plainSR = snowPlain.AddComponent<SpriteRenderer>();
-            plainSR.sprite = whiteSprite;
-            plainSR.color = new Color(0.93f, 0.96f, 1f, 0.85f);
-            plainSR.drawMode = SpriteDrawMode.Tiled;
-            plainSR.tileMode = SpriteTileMode.Continuous;
-            plainSR.size = new Vector2(60f, 4f);
-            plainSR.sortingOrder = -20;
+            var sr = mountain.AddComponent<SpriteRenderer>();
+            sr.sprite = bgSprite;
+            sr.color = Color.white;
+            sr.drawMode = SpriteDrawMode.Simple;
+            sr.sortingOrder = -100;
         }
 
         private static void CreateSnowParticles()
