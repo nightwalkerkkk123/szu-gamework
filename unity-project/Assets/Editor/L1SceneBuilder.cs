@@ -383,44 +383,34 @@ namespace SugarRush.Editor
         private static void CreateBackground()
         {
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
-            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
-            var mainCamGo = GameObject.Find("MainCamera");
-            if (mainCamGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
-            var mainCam = mainCamGo.GetComponent<Camera>();
-            float camHeight = mainCam.orthographicSize * 2f;
-            float camWidth = camHeight * mainCam.aspect;
+            var canvasGo = GameObject.Find("Canvas");
+            if (canvasGo == null) { Debug.LogWarning("[L1SceneBuilder] Canvas not found for background."); return; }
 
-            var bgRoot = new GameObject("Background");
-            bgRoot.transform.SetParent(mainCamGo.transform);
-            bgRoot.transform.localPosition = new Vector3(0f, 0f, 15f);
+            // Full-screen Canvas background (always visible, no camera dependency)
+            var bgUI = new GameObject("BackgroundUI");
+            bgUI.transform.SetParent(canvasGo.transform, false);
+            bgUI.transform.SetAsFirstSibling();
 
-            // Sky fill — solid blue behind everything
-            var skyFill = new GameObject("SkyFill");
-            skyFill.transform.SetParent(bgRoot.transform);
-            skyFill.transform.localPosition = new Vector3(0f, 0f, 16f);
-            var skySR = skyFill.AddComponent<SpriteRenderer>();
-            skySR.sprite = whiteSprite;
-            skySR.drawMode = SpriteDrawMode.Sliced;
-            skySR.size = new Vector2(camWidth + 4f, camHeight + 4f);
-            skySR.color = new Color(0.55f, 0.8f, 1f, 1f);
-            skySR.sortingOrder = -25;
+            var bgImg = bgUI.AddComponent<Image>();
+            bgImg.sprite = bgSprite;
+            bgImg.color = Color.white;
 
-            // Mountain background image
-            var mountain = new GameObject("MountainBG");
-            mountain.transform.SetParent(bgRoot.transform);
-            mountain.transform.localPosition = Vector3.zero;
+            var bgRect = bgUI.GetComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
 
-            var mtnSR = mountain.AddComponent<SpriteRenderer>();
-            mtnSR.sprite = bgSprite;
-            mtnSR.color = Color.white;
-            mtnSR.drawMode = SpriteDrawMode.Simple;
-            mtnSR.sortingOrder = -20;
-
-            // Scale to fill screen (Simple mode ignores .size, so we use transform scale)
-            float spriteW = bgSprite.bounds.size.x;
-            float spriteH = bgSprite.bounds.size.y;
-            float scale = Mathf.Max(camWidth / spriteW, camHeight / spriteH);
-            mountain.transform.localScale = new Vector3(scale, scale, 1f);
+            // Light snow overlay
+            var overlay = new GameObject("SnowOverlay");
+            overlay.transform.SetParent(bgUI.transform, false);
+            var ovImg = overlay.AddComponent<Image>();
+            ovImg.color = new Color(0.9f, 0.95f, 1f, 0.25f);
+            var ovRect = overlay.GetComponent<RectTransform>();
+            ovRect.anchorMin = Vector2.zero;
+            ovRect.anchorMax = Vector2.one;
+            ovRect.offsetMin = Vector2.zero;
+            ovRect.offsetMax = Vector2.zero;
         }
 
         private static void CreateSnowParticles()
