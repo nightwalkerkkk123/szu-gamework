@@ -17,7 +17,9 @@ namespace SugarRush.Gameplay
         [Header("Movement")]
         [SerializeField] private float _baseAcceleration = 18f;
         [SerializeField] private float _maxSpeed = 25f;
-        [SerializeField] private float _jumpForce = 12f;
+        [SerializeField] private float _jumpForce = 8f;
+        [Tooltip("Extra downward acceleration while airborne. Lowers the jump apex AND shortens hang time, turning the floaty default jump into a crisp arcade hop. Mass-independent (Acceleration mode).")]
+        [SerializeField] private float _extraFallGravity = 16f;
         [SerializeField] private float _groundCheckDistance = 0.55f;
         [SerializeField] private LayerMask _groundMask;
 
@@ -25,9 +27,14 @@ namespace SugarRush.Gameplay
         [SerializeField] private float _minSpeedMultiplier = 0.5f;
         [SerializeField] private float _maxSpeedMultiplier = 1.25f;
 
+        [Header("Fall Death")]
+        [Tooltip("Seconds of continuous falling (airborne, descending) before the run fails. Replaces the fixed gap death zone on the downhill track.")]
+        [SerializeField] private float _fallDeathSeconds = 2f;
+
         private Rigidbody _rb;
         private bool _isGrounded;
         private bool _isDead;
+        private float _fallTimer;
 
         public bool IsGrounded => _isGrounded;
         public float Speed => _rb.velocity.magnitude;
@@ -54,6 +61,22 @@ namespace SugarRush.Gameplay
 
             _isGrounded = CheckGrounded();
 
+            // Fall-to-death: if airborne and descending for too long, the player has
+            // dropped into a gap (no fixed death plane works on a descending track).
+            if (!_isGrounded && _rb.velocity.y < -1f)
+            {
+                _fallTimer += Time.fixedDeltaTime;
+                if (_fallTimer > _fallDeathSeconds)
+                {
+                    Die();
+                    return;
+                }
+            }
+            else
+            {
+                _fallTimer = 0f;
+            }
+
             float speedMod = CalculateSpeedModifier();
             float controlMod = _glucoseSystem != null ? _glucoseSystem.ControlModifier : 1f;
 
@@ -74,6 +97,9 @@ namespace SugarRush.Gameplay
                 float desiredX = _maxSpeed * speedMod * controlMod;
                 float deltaX = desiredX - velocity.x;
                 _rb.AddForce(Vector3.right * deltaX * 2f * controlMod, ForceMode.Force);
+
+                // Extra fall gravity: crisper, less floaty jump arc.
+                _rb.AddForce(Vector3.down * _extraFallGravity, ForceMode.Acceleration);
             }
         }
 

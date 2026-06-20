@@ -224,63 +224,39 @@ namespace SugarRush.Editor
 
             var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
 
-            // Body — blue ski jacket
-            var bodyGO = new GameObject("Body");
-            bodyGO.transform.SetParent(go.transform);
-            bodyGO.transform.localPosition = new Vector3(0f, -0.1f, 0f);
-            var bodySR = bodyGO.AddComponent<SpriteRenderer>();
-            bodySR.sprite = whiteSprite;
-            bodySR.color = new Color(0.15f, 0.3f, 0.75f, 1f);
-            bodySR.drawMode = SpriteDrawMode.Sliced;
-            bodySR.size = new Vector2(0.65f, 1.1f);
-            bodySR.sortingOrder = 1;
-
-            // Head
-            var headGO = new GameObject("Head");
-            headGO.transform.SetParent(go.transform);
-            headGO.transform.localPosition = new Vector3(0f, 0.75f, 0f);
-            var headSR = headGO.AddComponent<SpriteRenderer>();
-            headSR.sprite = whiteSprite;
-            headSR.color = new Color(1f, 0.82f, 0.7f, 1f);
-            headSR.drawMode = SpriteDrawMode.Sliced;
-            headSR.size = new Vector2(0.5f, 0.5f);
-            headSR.sortingOrder = 2;
-
-            // Red hat
-            var hatGO = new GameObject("Hat");
-            hatGO.transform.SetParent(headGO.transform);
-            hatGO.transform.localPosition = new Vector3(0f, 0.22f, 0f);
-            var hatSR = hatGO.AddComponent<SpriteRenderer>();
-            hatSR.sprite = whiteSprite;
-            hatSR.color = new Color(0.85f, 0.15f, 0.15f, 1f);
-            hatSR.drawMode = SpriteDrawMode.Sliced;
-            hatSR.size = new Vector2(0.55f, 0.3f);
-            hatSR.sortingOrder = 3;
-
-            // Yellow scarf
-            var scarfGO = new GameObject("Scarf");
-            scarfGO.transform.SetParent(go.transform);
-            scarfGO.transform.localPosition = new Vector3(0.15f, 0.45f, -0.02f);
-            var scarfSR = scarfGO.AddComponent<SpriteRenderer>();
-            scarfSR.sprite = whiteSprite;
-            scarfSR.color = new Color(1f, 0.85f, 0.2f, 1f);
-            scarfSR.drawMode = SpriteDrawMode.Sliced;
-            scarfSR.size = new Vector2(0.4f, 0.15f);
-            scarfSR.sortingOrder = 2;
-
-            // Main SpriteRenderer for PlayerVisuals reference
+            // Visual: a 2D Tangtang ski sprite (2D-native for this side-scroller; the 3D
+            // model is reserved for L2's 3D fusion scene). An invisible SpriteRenderer is kept
+            // ONLY as the PlayerVisuals tint anchor — tint stays hidden (alpha 0) so the
+            // colourful sprite isn't recoloured, while shake/flash timing still drives the
+            // Player transform (the sprite, being a child, shakes along).
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = whiteSprite;
-            sr.color = new Color(1f, 1f, 1f, 0f); // invisible — children provide the visuals
+            sr.color = new Color(1f, 1f, 1f, 0f);
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
 
-            CreateSki(go.transform, new Vector2(-0.25f, -0.75f));
-            CreateSki(go.transform, new Vector2(0.25f, -0.75f));
+            var tangSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Characters/Tangtang/Tangtang_Ski.png");
+            var visualGO = new GameObject("TangtangSprite");
+            visualGO.transform.SetParent(go.transform, false);
+            var visualSR = visualGO.AddComponent<SpriteRenderer>();
+            visualSR.sprite = tangSprite;
+            visualSR.sortingOrder = 2;
+            if (tangSprite != null)
+            {
+                // Sprite imports at ~10 units tall (1024px / 100 PPU); scale to ~1.8 so it
+                // reads slightly larger than the 1.6 collider, the way characters usually do.
+                float spriteHeight = Mathf.Max(tangSprite.bounds.size.y, 0.0001f);
+                visualGO.transform.localScale = Vector3.one * (1.8f / spriteHeight);
+            }
+            else
+            {
+                Debug.LogWarning("[L1SceneBuilder] Tangtang_Ski.png not found — player has no visible sprite.");
+            }
 
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 2.5f;
             rb.freezeRotation = true;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // ground is a thin EdgeCollider — avoid tunnelling
 
             var col = go.AddComponent<BoxCollider2D>();
             col.size = new Vector2(0.8f, 1.6f);
@@ -297,7 +273,7 @@ namespace SugarRush.Editor
             CreateSkiTrail(go.transform, skiing, glucose);
 
             var visuals = go.AddComponent<PlayerVisuals>();
-            SetField(visuals, "_bodyRenderer", bodySR);
+            SetField(visuals, "_bodyRenderer", sr); // transparent anchor — tint hidden, shake retained
             SetField(visuals, "_skiingController", skiing);
             SetField(visuals, "_glucoseSystem", glucose);
 
@@ -364,47 +340,40 @@ namespace SugarRush.Editor
 
         private static void CreateBackground()
         {
-            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
             var bgRoot = new GameObject("Background");
+            EnsureSpriteFullRect("Assets/Art/Environment/Bg_Sky.png");
+            EnsureSpriteFullRect("Assets/Art/Environment/Bg_Mid.png");
 
-            // Sky gradient (far background)
-            var sky = new GameObject("Sky");
+            // Sky: full cave panorama — a backdrop that fills the view and follows the camera 1:1,
+            // so it can NEVER reveal transparency. Not tiled (it's one framed picture), just scaled
+            // to cover the view with margin.
+            var sky = new GameObject("Bg_Sky");
             sky.transform.SetParent(bgRoot.transform);
-            sky.transform.position = new Vector3(90f, 3f, 15f);
+            sky.transform.position = new Vector3(0f, 2f, 16f);
             var skySR = sky.AddComponent<SpriteRenderer>();
-            skySR.sprite = whiteSprite;
-            skySR.color = new Color(0.7f, 0.85f, 0.95f, 1f);
-            skySR.drawMode = SpriteDrawMode.Tiled;
-            skySR.size = new Vector2(60f, 12f);
+            skySR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Environment/Bg_Sky.png");
             skySR.sortingOrder = -30;
-            skySR.tileMode = SpriteTileMode.Continuous;
-
-            // Far mountains
-            for (int i = 0; i < 4; i++)
+            if (skySR.sprite != null)
             {
-                var mountain = new GameObject($"Mountain_Far_{i}");
-                mountain.transform.SetParent(bgRoot.transform);
-                mountain.transform.position = new Vector3(-20 + i * 55f, -2f - i * 0.5f, 12f);
-                var sr = mountain.AddComponent<SpriteRenderer>();
-                sr.sprite = whiteSprite;
-                sr.color = new Color(0.5f + i * 0.05f, 0.6f + i * 0.05f, 0.75f + i * 0.05f, 1f);
-                sr.drawMode = SpriteDrawMode.Tiled;
-                sr.tileMode = SpriteTileMode.Continuous;
-                sr.size = new Vector2(20f, 4f + i * 1.5f);
-                sr.sortingOrder = -25 + i;
+                float h = Mathf.Max(skySR.sprite.bounds.size.y, 0.0001f);
+                sky.transform.localScale = Vector3.one * (16f / h); // cover the ~12-tall view + margin
             }
+            var skyPx = sky.AddComponent<SugarRush.Gameplay.ParallaxLayer>();
+            SetField(skyPx, "_factor", 1f); // follow camera fully — backdrop never leaves the view
 
-            // Snow-covered ground plane at horizon
-            var snowPlain = new GameObject("SnowPlain");
-            snowPlain.transform.SetParent(bgRoot.transform);
-            snowPlain.transform.position = new Vector3(90f, -4f, 10f);
-            var plainSR = snowPlain.AddComponent<SpriteRenderer>();
-            plainSR.sprite = whiteSprite;
-            plainSR.color = new Color(0.93f, 0.96f, 1f, 0.85f);
-            plainSR.drawMode = SpriteDrawMode.Tiled;
-            plainSR.tileMode = SpriteTileMode.Continuous;
-            plainSR.size = new Vector2(60f, 4f);
-            plainSR.sortingOrder = -20;
+            // Mid: horizontally-tileable ice-spike band (bottom-aligned, transparent top). Wide
+            // tiling + parallax. The huge tile width means it never runs out over the 2000m track.
+            var mid = new GameObject("Bg_Mid");
+            mid.transform.SetParent(bgRoot.transform);
+            mid.transform.position = new Vector3(0f, -1f, 12f);
+            var midSR = mid.AddComponent<SpriteRenderer>();
+            midSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Environment/Bg_Mid.png");
+            midSR.drawMode = SpriteDrawMode.Tiled;
+            midSR.tileMode = SpriteTileMode.Continuous;
+            midSR.size = new Vector2(4000f, 9.6f);
+            midSR.sortingOrder = -25;
+            var midPx = mid.AddComponent<SugarRush.Gameplay.ParallaxLayer>();
+            SetField(midPx, "_factor", 0.88f);
         }
 
         private static void CreateSnowParticles()
@@ -437,24 +406,43 @@ namespace SugarRush.Editor
             renderer.material = new Material(Shader.Find("Sprites/Default"));
         }
 
-        private static void CreateContinuousGround(GameObject groundRoot, int groundLayer, PhysicsMaterial2D physicsMat,
-            float startX, float startY, float length, float slopeAngle, int id)
+        private static void BuildGroundEdges(GameObject groundRoot, int groundLayer,
+            PhysicsMaterial2D physicsMat, List<List<Vector2>> polylines)
         {
-            float rad = slopeAngle * Mathf.Deg2Rad;
-            float halfLen = length * 0.5f;
-            float centerX = startX + halfLen * Mathf.Cos(rad);
-            float centerY = startY - halfLen * Mathf.Sin(rad);
+            int idx = 0;
+            foreach (var line in polylines)
+            {
+                if (line == null || line.Count < 2) continue;
 
-            var go = new GameObject($"GroundCollider_{id}");
-            go.transform.SetParent(groundRoot.transform);
-            go.transform.position = new Vector3(centerX, centerY, 0f);
-            go.transform.rotation = Quaternion.Euler(0f, 0f, -slopeAngle);
-            go.layer = groundLayer;
+                var go = new GameObject($"GroundEdge_{idx++}");
+                go.transform.SetParent(groundRoot.transform);
+                go.transform.position = Vector3.zero;
+                go.layer = groundLayer;
 
-            var col = go.AddComponent<BoxCollider2D>();
-            col.size = new Vector2(length + 1.5f, 3f);
-            col.offset = new Vector2(0f, -0.3f);
-            col.sharedMaterial = physicsMat;
+                var edge = go.AddComponent<EdgeCollider2D>();
+                edge.points = line.ToArray();
+                edge.edgeRadius = 0.05f; // slight thickness guards against fast tunnelling
+                edge.sharedMaterial = physicsMat;
+            }
+        }
+
+        /// <summary>
+        /// Ensures the ice-cliff slope sprite imports as a Sprite with a Full-Rect mesh, which
+        /// Tiled draw mode requires. Without this, tiling collapses into one stretched quad.
+        /// </summary>
+        private static void EnsureSpriteFullRect(string path)
+        {
+            if (AssetImporter.GetAtPath(path) is not TextureImporter ti) return;
+
+            ti.textureType = TextureImporterType.Sprite;
+            ti.spriteImportMode = SpriteImportMode.Single;
+
+            var settings = new TextureImporterSettings();
+            ti.ReadTextureSettings(settings);
+            settings.spriteMeshType = SpriteMeshType.FullRect;
+            ti.SetTextureSettings(settings);
+
+            ti.SaveAndReimport();
         }
 
         private static void CreateLevelFromSegments(List<LevelSegmentData> segments, PhysicsMaterial2D slipperyGround, GlucoseSystem glucoseSystem)
@@ -472,6 +460,8 @@ namespace SugarRush.Editor
                 groundLayer = 8;
             }
 
+            EnsureSpriteFullRect("Assets/Art/Environment/Slope_IceCliff.png");
+
             var groundRoot = new GameObject("Ground");
             var obstaclesRoot = new GameObject("Obstacles");
             var itemsRoot = new GameObject("Items");
@@ -484,6 +474,13 @@ namespace SugarRush.Editor
             float currentY = firstHalfLength * Mathf.Sin(firstRad);
             int platformIndex = 0;
 
+            // Ground collision is one continuous EdgeCollider2D polyline that follows the
+            // slope surface. Rigid rotated box platforms (the old approach) left seam bumps
+            // at every slope change — the "invisible obstacles". A polyline has none.
+            const float groundSurfaceOffset = 0.6f; // visual snow top sits ~0.6 above the slope line
+            var groundPolylines = new List<List<Vector2>>();
+            var groundLine = new List<Vector2> { new Vector2(currentX, currentY + groundSurfaceOffset) };
+
             foreach (var segment in segments)
             {
                 if (segment == null) continue;
@@ -494,78 +491,55 @@ namespace SugarRush.Editor
                 float segmentWorldDX = segment.Length * cos;
                 float segmentWorldDY = segment.Length * sin;
 
-                // Build ground pieces
-                int pieces = Mathf.Max(1, Mathf.CeilToInt(segment.Length / segment.GroundPieceLength));
-                float pieceLength = segment.Length / pieces;
-
-                // First pass: create one continuous collider per continuous block
-                // This eliminates gaps between individual platforms
-                float segStartX = currentX;
-                float segStartY = currentY;
-                float segEndX = currentX + segmentWorldDX;
-                float segEndY = currentY - segmentWorldDY;
-
+                // Ground collision: extend the EdgeCollider2D polyline. On a gap, close the
+                // current polyline just before the gap and start a fresh one after it.
                 if (segment.HasGap)
                 {
-                    // Gap segment: create two continuous colliders (before gap, after gap)
                     float gapStartDist = segment.GapStartRatio * segment.Length;
                     float gapEndDist = segment.GapEndRatio * segment.Length;
-
-                    // Pre-gap block
-                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
-                        currentX, currentY, gapStartDist, segment.SlopeAngle, platformIndex);
-
-                    // Post-gap block
-                    float postGapStartX = currentX + gapEndDist * cos;
-                    float postGapStartY = currentY - gapEndDist * sin;
-                    float postGapLength = segment.Length - gapEndDist;
-                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
-                        postGapStartX, postGapStartY, postGapLength, segment.SlopeAngle, platformIndex + 100);
-                }
-                else
-                {
-                    // No gap: one single continuous collider for the whole segment
-                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
-                        currentX, currentY, segment.Length, segment.SlopeAngle, platformIndex);
+                    groundLine.Add(new Vector2(currentX + gapStartDist * cos, currentY - gapStartDist * sin + groundSurfaceOffset));
+                    groundPolylines.Add(groundLine);
+                    groundLine = new List<Vector2>
+                    {
+                        new Vector2(currentX + gapEndDist * cos, currentY - gapEndDist * sin + groundSurfaceOffset)
+                    };
                 }
 
-                // Second pass: create visual sprites (decorative, no colliders needed)
-                for (int i = 0; i < pieces; i++)
+                // Second pass: visual slope (plan A). A clean snow strip sits EXACTLY on the
+                // collision line so the character stands on it (no float). The ice-cliff image is
+                // the decorative wall BELOW it — being a background, its repetition/imprecision
+                // don't matter. This is why the character now aligns: the surface it stands on is
+                // code-placed on the collision line, not a guessed pixel row inside an image.
                 {
-                    float tCenter = (i + 0.5f) / pieces;
+                    float segCenterDist = segment.Length * 0.5f;
+                    float cx = currentX + segCenterDist * cos;
+                    float cy = currentY - segCenterDist * sin;
+                    var rot = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
 
-                    // Skip visual pieces inside the gap.
-                    if (segment.HasGap && tCenter >= segment.GapStartRatio && tCenter <= segment.GapEndRatio)
-                        continue;
+                    // Ice-cliff wall below the surface (decorative; sortingOrder behind the snow).
+                    const float cliffHeight = 9.6f; // 2240x960 @100 PPU
+                    var cliff = new GameObject($"Cliff_{platformIndex}");
+                    cliff.transform.SetParent(groundRoot.transform);
+                    cliff.transform.position = new Vector3(cx, cy + groundSurfaceOffset - cliffHeight * 0.5f, 0f);
+                    cliff.transform.rotation = rot;
+                    var cliffSR = cliff.AddComponent<SpriteRenderer>();
+                    cliffSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Environment/Slope_IceCliff.png");
+                    cliffSR.drawMode = SpriteDrawMode.Tiled;
+                    cliffSR.size = new Vector2(segment.Length, cliffHeight);
+                    cliffSR.flipX = true;
+                    cliffSR.sortingOrder = -1;
 
-                    float centerDistance = tCenter * segment.Length;
-                    float x = currentX + centerDistance * cos;
-                    float y = currentY - centerDistance * sin;
-
-                    // Visual snow sprite only (collider is on the continuous ground)
-                    var platform = new GameObject($"Platform_{platformIndex++}");
-                    platform.transform.SetParent(groundRoot.transform);
-                    platform.transform.position = new Vector3(x, y, 0f);
-                    platform.transform.rotation = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
-
-                    var sr = platform.AddComponent<SpriteRenderer>();
-                    var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
-                    sr.sprite = whiteSprite;
-                    sr.color = new Color(0.92f, 0.96f, 1f, 1f);
-                    sr.drawMode = SpriteDrawMode.Tiled;
-                    sr.size = new Vector2(pieceLength, 1.2f);
-                    sr.sortingOrder = 0;
-
-                    // Snow overlay
-                    var overlay = new GameObject("SnowTop");
-                    overlay.transform.SetParent(platform.transform);
-                    overlay.transform.localPosition = new Vector3(0f, 0.55f, -0.01f);
-                    var overlaySR = overlay.AddComponent<SpriteRenderer>();
-                    overlaySR.sprite = whiteSprite;
-                    overlaySR.color = new Color(1f, 1f, 1f, 0.4f);
-                    overlaySR.drawMode = SpriteDrawMode.Tiled;
-                    overlaySR.size = new Vector2(pieceLength, 0.3f);
-                    overlaySR.sortingOrder = 1;
+                    // Clean snow surface — top edge exactly on the collision line (cy + offset).
+                    var snow = new GameObject($"Snow_{platformIndex++}");
+                    snow.transform.SetParent(groundRoot.transform);
+                    snow.transform.position = new Vector3(cx, cy + groundSurfaceOffset - 0.6f, 0f); // center 0.6 below line → top on line
+                    snow.transform.rotation = rot;
+                    var snowSR = snow.AddComponent<SpriteRenderer>();
+                    snowSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+                    snowSR.color = new Color(0.95f, 0.97f, 1f, 1f);
+                    snowSR.drawMode = SpriteDrawMode.Tiled;
+                    snowSR.size = new Vector2(segment.Length, 1.2f);
+                    snowSR.sortingOrder = 0;
                 }
 
                 // Visual dark pit for gap.
@@ -585,14 +559,22 @@ namespace SugarRush.Editor
                     pit.transform.rotation = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
                 }
 
-                // Place obstacles
+                // Place obstacles. The COLLIDER lives on the root (scale 1, gameplay-accurate);
+                // the art sprite is a scaled CHILD so its size never corrupts the collider.
                 foreach (var obstacle in segment.Obstacles)
                 {
                     Vector3 pos = EvaluateSegmentPosition(currentX, currentY, segment.Length, segment.SlopeAngle, obstacle.DistanceAlongSegment, obstacle.HeightOffset);
-                    var go = CreateSpriteObject(obstaclesRoot.transform, obstacle.Type.ToString(), pos, obstacle.Size, obstacle.Color);
-                    go.AddComponent<BoxCollider2D>();
+                    var go = new GameObject(obstacle.Type.ToString());
+                    go.transform.SetParent(obstaclesRoot.transform);
+                    go.transform.position = pos;
+
+                    AddObstacleArt(go.transform, obstacle);
+
+                    var box = go.AddComponent<BoxCollider2D>();
+                    box.size = obstacle.Size;
                     var obs = go.AddComponent<Obstacle>();
                     SetField(obs, "_type", obstacle.Type);
+                    SetField(obs, "_heightMeters", obstacle.HeightMeters); // data carried HeightMeters; assembly previously dropped it
                 }
 
                 // Place pickups
@@ -612,13 +594,18 @@ namespace SugarRush.Editor
 
                 currentX += segmentWorldDX;
                 currentY -= segmentWorldDY;
+                groundLine.Add(new Vector2(currentX, currentY + groundSurfaceOffset));
             }
+
+            groundPolylines.Add(groundLine);
+            BuildGroundEdges(groundRoot, groundLayer, slipperyGround, groundPolylines);
 
             // Finish line at end of last segment
             Vector3 finishPos = new Vector3(currentX, currentY + 2f, 0f);
             var finish = CreateSpriteObject(null, "FinishLine", finishPos, new Vector2(1f, 4f), Color.magenta);
             var finishTrigger = finish.AddComponent<BoxCollider2D>();
             finishTrigger.isTrigger = true;
+            finishTrigger.size = new Vector2(1f, 4f); // match the visual
             finish.AddComponent<FinishLine>();
         }
 
@@ -631,11 +618,79 @@ namespace SugarRush.Editor
             return new Vector3(x, y, 0f);
         }
 
+        private static void AddObstacleArt(Transform parent, SegmentObstacle obstacle)
+        {
+            string spritePath = ObstacleSpritePath(obstacle.Type);
+            if (spritePath != null)
+            {
+                var vis = new GameObject("Art");
+                vis.transform.SetParent(parent, false);
+                var vsr = vis.AddComponent<SpriteRenderer>();
+                vsr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                vsr.sortingOrder = 1;
+                if (vsr.sprite != null)
+                {
+                    float sh = Mathf.Max(vsr.sprite.bounds.size.y, 0.0001f);
+                    float target = Mathf.Max(obstacle.Size.x, obstacle.Size.y) * 1.6f; // art a bit larger than collider
+                    vis.transform.localScale = Vector3.one * (target / sh);
+                }
+            }
+            else
+            {
+                // Stumble / Crash have no art yet — coloured placeholder block on the root.
+                var vsr = parent.gameObject.AddComponent<SpriteRenderer>();
+                vsr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+                vsr.color = obstacle.Color;
+                vsr.drawMode = SpriteDrawMode.Sliced;
+                vsr.size = obstacle.Size;
+                vsr.sortingOrder = 1;
+            }
+        }
+
+        private static string ObstacleSpritePath(Obstacle.ObstacleType type)
+        {
+            switch (type)
+            {
+                case Obstacle.ObstacleType.Jumpable:  return "Assets/Art/Props/Obs_SugarBlock.png";   // jump over
+                case Obstacle.ObstacleType.Rollable:  return "Assets/Art/Props/Obs_IceSpike.png";     // roll under
+                case Obstacle.ObstacleType.Avoidable: return "Assets/Art/Props/Obs_HyperVortex.png";  // must dodge
+                default: return null;                                                                 // Stumble/Crash → placeholder
+            }
+        }
+
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
         {
-            var go = CreateSpriteObject(parent, name, pos, new Vector2(0.5f, 0.5f), color);
+            var go = new GameObject(name);
+            go.transform.SetParent(parent);
+            go.transform.position = pos;
+
+            // Sugar snowflake has dedicated art; other items keep the coloured placeholder dot.
+            if (effect is HighSugarSnowflakeEffect)
+            {
+                var vis = new GameObject("Art");
+                vis.transform.SetParent(go.transform, false);
+                var vsr = vis.AddComponent<SpriteRenderer>();
+                vsr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Props/Item_SugarSnowflake.png");
+                vsr.sortingOrder = 1;
+                if (vsr.sprite != null)
+                {
+                    float sh = Mathf.Max(vsr.sprite.bounds.size.y, 0.0001f);
+                    vis.transform.localScale = Vector3.one * (0.9f / sh);
+                }
+            }
+            else
+            {
+                var vsr = go.AddComponent<SpriteRenderer>();
+                vsr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+                vsr.color = color;
+                vsr.drawMode = SpriteDrawMode.Sliced;
+                vsr.size = new Vector2(0.5f, 0.5f);
+                vsr.sortingOrder = 1;
+            }
+
             var trigger = go.AddComponent<CircleCollider2D>();
             trigger.isTrigger = true;
+            trigger.radius = 0.25f;
             var pickup = go.AddComponent<PickupItem>();
             SetField(pickup, "_itemEffect", effect);
         }
@@ -656,13 +711,19 @@ namespace SugarRush.Editor
         private static void CreateGapDeathZone()
         {
             var go = new GameObject("GapDeathZone");
-            go.transform.position = new Vector3(0f, -20f, 0f);
+            go.transform.position = new Vector3(0f, -18f, 0f); // kill-floor stays ~15 below the player view
 
             var col = go.AddComponent<BoxCollider2D>();
             col.isTrigger = true;
             col.size = new Vector2(1000f, 10f);
 
             go.AddComponent<GapDeathZone>();
+
+            // Follow the camera so the kill-floor stays a FIXED distance below the player. The old
+            // fixed y=-20 sat in the middle of the descent (track drops to ~-350), so the player
+            // skied straight into it ~115m in — the "mysterious death".
+            var px = go.AddComponent<SugarRush.Gameplay.ParallaxLayer>();
+            SetField(px, "_factor", 1f);
         }
 
         private static GameObject CreateGameFlow(SugarRushInput input, GameObject player, LevelData levelData)
@@ -905,19 +966,6 @@ namespace SugarRush.Editor
             buttonTextRect.anchorMin = Vector2.zero;
             buttonTextRect.anchorMax = Vector2.one;
             buttonTextRect.sizeDelta = Vector2.zero;
-        }
-
-        private static void CreateSki(Transform parent, Vector2 localPosition)
-        {
-            var go = new GameObject("Ski");
-            go.transform.SetParent(parent, false);
-            go.transform.localPosition = new Vector3(localPosition.x, localPosition.y, 0f);
-            go.transform.localRotation = Quaternion.Euler(0f, 0f, -12f);
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
-            sr.color = new Color(0.2f, 0.2f, 0.2f);
-            sr.drawMode = SpriteDrawMode.Sliced;
-            sr.size = new Vector2(0.12f, 1.2f);
         }
 
         private static void CreateSkiTrail(Transform parent, SkiingController skiingController, GlucoseSystem glucoseSystem)
