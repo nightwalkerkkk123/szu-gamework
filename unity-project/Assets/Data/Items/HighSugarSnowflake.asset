@@ -16,6 +16,6 @@ MonoBehaviour:
   <Description>k__BackingField: "\u7ACB\u5373 +25 \u8840\u7CD6\uFF0C\u5E76\u5728
     3 \u79D2\u5185\u63D0\u4F9B\u4E34\u65F6\u901F\u5EA6\u52A0\u6210\u3002"
   <Icon>k__BackingField: {fileID: 21300000, guid: 045a4c8e252a044cc8c1742d6ffbaf16, type: 3}
-  _instantDelta: 25
+  _instantDelta: 10
   _speedBoostDuration: 3
   _speedBoostMultiplier: 1.15
