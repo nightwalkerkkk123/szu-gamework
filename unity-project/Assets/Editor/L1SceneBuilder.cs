@@ -342,9 +342,10 @@ namespace SugarRush.Editor
         {
             var camGo = new GameObject("MainCamera");
             var camera = camGo.AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
             camera.orthographic = true;
             camera.orthographicSize = 6f;
-            camera.backgroundColor = new Color(0.76f, 0.88f, 0.95f);
+            camera.backgroundColor = new Color(0.45f, 0.7f, 0.95f);
             camGo.transform.position = new Vector3(0f, 2f, -10f);
             camGo.tag = "MainCamera";
 
@@ -382,6 +383,7 @@ namespace SugarRush.Editor
         private static void CreateBackground()
         {
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
+            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
             var mainCamGo = GameObject.Find("MainCamera");
             if (mainCamGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
             var mainCam = mainCamGo.GetComponent<Camera>();
@@ -392,6 +394,18 @@ namespace SugarRush.Editor
             bgRoot.transform.SetParent(mainCamGo.transform);
             bgRoot.transform.localPosition = new Vector3(0f, 0f, 15f);
 
+            // Sky fill — solid blue behind everything
+            var skyFill = new GameObject("SkyFill");
+            skyFill.transform.SetParent(bgRoot.transform);
+            skyFill.transform.localPosition = new Vector3(0f, 0f, 16f);
+            var skySR = skyFill.AddComponent<SpriteRenderer>();
+            skySR.sprite = whiteSprite;
+            skySR.drawMode = SpriteDrawMode.Sliced;
+            skySR.size = new Vector2(camWidth + 4f, camHeight + 4f);
+            skySR.color = new Color(0.55f, 0.8f, 1f, 1f);
+            skySR.sortingOrder = -25;
+
+            // Mountain background image
             var mountain = new GameObject("MountainBG");
             mountain.transform.SetParent(bgRoot.transform);
             mountain.transform.localPosition = Vector3.zero;
