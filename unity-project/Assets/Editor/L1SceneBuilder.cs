@@ -383,34 +383,30 @@ namespace SugarRush.Editor
         private static void CreateBackground()
         {
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
-            var canvasGo = GameObject.Find("Canvas");
-            if (canvasGo == null) { Debug.LogWarning("[L1SceneBuilder] Canvas not found for background."); return; }
+            var camGo = GameObject.Find("MainCamera");
+            if (camGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
+            var cam = camGo.GetComponent<Camera>();
+            float camHeight = cam.orthographicSize * 2f;
+            float camWidth = camHeight * cam.aspect;
 
-            // Full-screen Canvas background (always visible, no camera dependency)
-            var bgUI = new GameObject("BackgroundUI");
-            bgUI.transform.SetParent(canvasGo.transform, false);
-            bgUI.transform.SetAsFirstSibling();
+            // 3D sprite background attached to camera (renders behind all game objects)
+            var bgRoot = new GameObject("Background");
+            bgRoot.transform.SetParent(camGo.transform);
+            bgRoot.transform.localPosition = new Vector3(0f, 0f, 20f);
 
-            var bgImg = bgUI.AddComponent<Image>();
-            bgImg.sprite = bgSprite;
-            bgImg.color = Color.white;
+            var mountain = new GameObject("MountainBG");
+            mountain.transform.SetParent(bgRoot.transform);
+            mountain.transform.localPosition = Vector3.zero;
 
-            var bgRect = bgUI.GetComponent<RectTransform>();
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
-            bgRect.offsetMin = Vector2.zero;
-            bgRect.offsetMax = Vector2.zero;
+            var sr = mountain.AddComponent<SpriteRenderer>();
+            sr.sprite = bgSprite;
+            sr.color = Color.white;
+            sr.drawMode = SpriteDrawMode.Simple;
+            sr.sortingOrder = -100;
 
-            // Light snow overlay
-            var overlay = new GameObject("SnowOverlay");
-            overlay.transform.SetParent(bgUI.transform, false);
-            var ovImg = overlay.AddComponent<Image>();
-            ovImg.color = new Color(0.9f, 0.95f, 1f, 0.25f);
-            var ovRect = overlay.GetComponent<RectTransform>();
-            ovRect.anchorMin = Vector2.zero;
-            ovRect.anchorMax = Vector2.one;
-            ovRect.offsetMin = Vector2.zero;
-            ovRect.offsetMax = Vector2.zero;
+            float spriteW = bgSprite.bounds.size.x;
+            float spriteH = bgSprite.bounds.size.y;
+            mountain.transform.localScale = new Vector3(camWidth / spriteW, camHeight / spriteH, 1f);
         }
 
         private static void CreateSnowParticles()
