@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f367109a6b5b24c933e2ea6d7e198c, type: 3}
   m_Name: GlucoseConfig
   m_EditorClassIdentifier: 
-  startValue: 60
+  startValue: 75
   driftLowCrisis: -0.2
   driftLowWarning: -0.3
   driftNormal: -0.5
@@ -23,7 +23,7 @@ MonoBehaviour:
   lowWarningThreshold: 30
   highWarningThreshold: 75
   highCrisisThreshold: 95
-  lowCrisisFailTime: 3
+  lowCrisisFailTime: 5
   highCrisisFailTime: 3
   speedModifierCurve:
     serializedVersion: 2
