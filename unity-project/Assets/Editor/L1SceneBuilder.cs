@@ -400,8 +400,13 @@ namespace SugarRush.Editor
             mtnSR.sprite = bgSprite;
             mtnSR.color = Color.white;
             mtnSR.drawMode = SpriteDrawMode.Simple;
-            mtnSR.size = new Vector2(camWidth + 2f, camHeight + 2f);
             mtnSR.sortingOrder = -20;
+
+            // Scale to fill screen (Simple mode ignores .size, so we use transform scale)
+            float spriteW = bgSprite.bounds.size.x;
+            float spriteH = bgSprite.bounds.size.y;
+            float scale = Mathf.Max(camWidth / spriteW, camHeight / spriteH);
+            mountain.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
         private static void CreateSnowParticles()
