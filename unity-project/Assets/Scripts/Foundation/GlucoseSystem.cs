@@ -79,17 +79,27 @@ namespace SugarRush.Foundation
         {
             float deltaTime = Time.deltaTime;
 
+            // Accumulate every per-frame source, then raise OnValueChanged ONCE at the
+            // end — previously drift, hazard and each buff each fired their own event,
+            // spamming the UI 1-3 times per frame.
+            bool valueChanged = false;
+
             // Passive skiing decay — zone-aware (GDD §4.4).
-            ApplyDelta(ResolveZoneDrift() * deltaTime);
+            float drift = ResolveZoneDrift() * deltaTime;
+            if (drift != 0f)
+            {
+                ApplyDelta(drift, suppressEvents: true);
+                valueChanged = true;
+            }
 
             // Environmental / hazard passive delta
             if (_passiveDeltaPerSecond != 0f)
             {
-                ApplyDelta(_passiveDeltaPerSecond * deltaTime);
+                ApplyDelta(_passiveDeltaPerSecond * deltaTime, suppressEvents: true);
+                valueChanged = true;
             }
 
             // Tick timed buffs
-            bool anyBuffChanged = false;
             for (int i = _activeBuffs.Count - 1; i >= 0; i--)
             {
                 var buff = _activeBuffs[i];
@@ -97,18 +107,17 @@ namespace SugarRush.Foundation
                 {
                     TimerService.Instance.Unregister(buff.Timer);
                     _activeBuffs.RemoveAt(i);
-                    anyBuffChanged = true;
                     continue;
                 }
 
                 if (buff.DeltaPerSecond != 0f)
                 {
                     ApplyDelta(buff.DeltaPerSecond * deltaTime, suppressEvents: true);
-                    anyBuffChanged = true;
+                    valueChanged = true;
                 }
             }
 
-            if (anyBuffChanged)
+            if (valueChanged)
             {
                 RaiseValueChanged();
             }

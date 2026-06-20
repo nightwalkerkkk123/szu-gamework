@@ -30,12 +30,13 @@ namespace SugarRush.Core
         {
             if (IsExpired) return false;
 
-            RemainingTime -= deltaTime;
+            // Clamp before notifying so OnTick never reports a negative remaining
+            // time (progress-bar listeners would otherwise briefly read > 100%).
+            RemainingTime = Mathf.Max(0f, RemainingTime - deltaTime);
             OnTick?.Invoke(RemainingTime);
 
             if (RemainingTime <= 0f)
             {
-                RemainingTime = 0f;
                 OnExpired?.Invoke();
                 return true;
             }

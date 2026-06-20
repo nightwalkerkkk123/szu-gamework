@@ -26,8 +26,11 @@ namespace SugarRush.Core
             try
             {
                 string json = File.ReadAllText(_filePath);
-                var data = JsonUtility.FromJson<GameSaveData>(json);
-                return data ?? new GameSaveData();
+                var data = JsonUtility.FromJson<GameSaveData>(json) ?? new GameSaveData();
+                // A corrupt/partial JSON (e.g. "{}") deserializes with a null list,
+                // which would NRE on the first GetOrCreateLevelBest().Find() call.
+                data.LevelBests ??= new System.Collections.Generic.List<GameSaveData.LevelBest>();
+                return data;
             }
             catch (System.Exception e)
             {

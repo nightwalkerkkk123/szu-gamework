@@ -16,28 +16,12 @@ namespace SugarRush.Gameplay.Items
         public override void Apply(GlucoseSystem glucoseSystem, SkiingController skiingController)
         {
             glucoseSystem?.ApplyDelta(_instantDelta);
-            if (skiingController != null)
-            {
-                skiingController.StartCoroutine(SpeedBoostRoutine(skiingController));
-            }
-            Debug.Log($"[Item] High Sugar Snowflake applied: +{_instantDelta:F1} glucose, speed boost x{_speedBoostMultiplier:F2}.", skiingController);
-        }
-
-        private System.Collections.IEnumerator SpeedBoostRoutine(SkiingController skiingController)
-        {
-            // Placeholder: direct velocity manipulation. Replace with a proper buff system later.
-            var rb = skiingController.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity *= _speedBoostMultiplier;
-            }
-
-            yield return new WaitForSeconds(_speedBoostDuration);
-
-            if (rb != null)
-            {
-                rb.velocity /= _speedBoostMultiplier;
-            }
+            // Request a temporary speed bonus through the controller's interface.
+            // It raises the speed cap + downhill accel for the duration — unlike
+            // poking Rigidbody2D.velocity, which the speed limiter clamps away in a
+            // single frame and which leaks into the vertical (jump) velocity.
+            skiingController?.ApplySpeedMultiplierBonus(_speedBoostMultiplier, _speedBoostDuration);
+            Debug.Log($"[Item] High Sugar Snowflake applied: +{_instantDelta:F1} glucose, speed boost x{_speedBoostMultiplier:F2} for {_speedBoostDuration:F1}s.", skiingController);
         }
     }
 }

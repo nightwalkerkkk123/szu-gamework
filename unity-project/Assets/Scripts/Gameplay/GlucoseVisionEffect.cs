@@ -44,6 +44,10 @@ namespace SugarRush.Gameplay
             _image = GetComponent<Image>();
             _image.color = _normalColor;
             _targetColor = _normalColor;
+            // Match the non-crisis frost target (transparent), so the frost overlay
+            // doesn't lerp toward the default Color(0,0,0,0) before the first zone
+            // event when driven via the GameEvents fallback path.
+            _targetFrostColor = new Color(1f, 1f, 1f, 0f);
         }
 
         private void Start()

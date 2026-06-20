@@ -27,6 +27,8 @@ namespace SugarRush.Gameplay
         private bool _isStumbled;
         private float _coyoteTimer;
         private float _jumpBufferTimer;
+        private float _speedBonusMultiplier = 1f;
+        private float _speedBonusTimer;
         private Vector2 _standingHitboxSize;
         private Vector2 _standingHitboxOffset;
 
@@ -36,6 +38,24 @@ namespace SugarRush.Gameplay
         public Vector2 Velocity => _rb.velocity;
         public float Speed => _rb.velocity.magnitude;
         public SkiingConfig Config => _config;
+
+        /// <summary>
+        /// Theoretical maximum jump height in meters: h = v² / (2g), where the
+        /// take-off velocity v = jumpForce / mass (an impulse changes velocity by
+        /// impulse/mass) and g accounts for the player's gravity scale. Used by
+        /// obstacles to decide whether a jump clears a given clearance height.
+        /// </summary>
+        public float MaxJumpHeight
+        {
+            get
+            {
+                if (_config == null || _rb == null) return float.MaxValue;
+                float g = Mathf.Abs(Physics2D.gravity.y) * _config.gravityScale;
+                if (g <= 0f) return float.MaxValue;
+                float v = _config.jumpForce / Mathf.Max(_rb.mass, 0.0001f);
+                return (v * v) / (2f * g);
+            }
+        }
 
         public event Action<bool> OnGroundedChanged;
         public event Action<bool> OnRollingChanged;
@@ -133,6 +153,12 @@ namespace SugarRush.Gameplay
             if (_coyoteTimer > 0f) _coyoteTimer -= Time.deltaTime;
             if (_jumpBufferTimer > 0f) _jumpBufferTimer -= Time.deltaTime;
 
+            if (_speedBonusTimer > 0f)
+            {
+                _speedBonusTimer -= Time.deltaTime;
+                if (_speedBonusTimer <= 0f) _speedBonusMultiplier = 1f;
+            }
+
             // Try buffered jump — held over from the previous frame, fires when
             // the player is grounded/coyote and not currently rolling.
             if (_jumpBufferTimer > 0f)
@@ -160,7 +186,7 @@ namespace SugarRush.Gameplay
 
             if (_isStumbled) return;
 
-            float speedMod = _glucoseSystem != null ? _glucoseSystem.SpeedModifier : 1f;
+            float speedMod = (_glucoseSystem != null ? _glucoseSystem.SpeedModifier : 1f) * _speedBonusMultiplier;
             float controlMod = _glucoseSystem != null ? _glucoseSystem.ControlModifier : 1f;
 
             ApplyDownhillForce(speedMod);
@@ -306,6 +332,20 @@ namespace SugarRush.Gameplay
             Debug.Log("[SkiingController] Roll ended.", this);
         }
 
+        /// <summary>
+        /// Apply a temporary speed bonus (e.g. from the High Sugar Snowflake item).
+        /// Raises the effective speed cap and downhill acceleration for the duration,
+        /// instead of poking <see cref="Rigidbody2D.velocity"/> directly — the latter
+        /// is clamped away by <see cref="ApplySpeedLimit"/> within a single physics
+        /// frame and corrupts the vertical velocity component.
+        /// </summary>
+        public void ApplySpeedMultiplierBonus(float multiplier, float duration)
+        {
+            if (multiplier <= 0f || duration <= 0f) return;
+            _speedBonusMultiplier = multiplier;
+            _speedBonusTimer = duration;
+        }
+
         public void TriggerStumble()
         {
             if (_isRolling) return; // invulnerable
@@ -325,9 +365,9 @@ namespace SugarRush.Gameplay
             Debug.Log("[SkiingController] Stumbled.", this);
         }
 
-        public void TriggerCrash()
+        public void TriggerCrash(bool force = false)
         {
-            if (_isRolling) return; // invulnerable
+            if (_isRolling && !force) return; // rolling is invulnerable unless the obstacle forces it (Avoidable)
             if (!enabled) return;   // already crashed
 
             if (TryGetComponent<SimpleParticleSpawner>(out var spawner))

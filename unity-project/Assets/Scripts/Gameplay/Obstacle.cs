@@ -46,11 +46,12 @@ namespace SugarRush.Gameplay
             if (!collision.collider.TryGetComponent<SkiingController>(out var controller))
                 return;
 
-            // Avoidable bypasses every invuln — always crash on contact.
+            // Avoidable bypasses every invuln — always crash on contact, even while
+            // rolling (force: true overrides the roll invulnerability window).
             if (_type == ObstacleType.Avoidable)
             {
                 ApplyHitFeedback(collision, controller);
-                controller.TriggerCrash();
+                controller.TriggerCrash(force: true);
                 return;
             }
 
@@ -100,22 +101,15 @@ namespace SugarRush.Gameplay
         }
 
         /// <summary>
-        /// Cheap first-cut height clearance check using the projectile formula
-        /// h = v² / (2g) against <see cref="SkiingConfig.jumpForce"/> and
-        /// <see cref="SkiingConfig.gravityScale"/>. Returns true when the obstacle's
-        /// required clearance is within the player's max jump height.
+        /// Height clearance check: the obstacle is cleared when its required
+        /// clearance is within the player's max jump height. The mass-aware
+        /// projectile math lives on <see cref="SkiingController.MaxJumpHeight"/>
+        /// so it stays correct even when the player's Rigidbody2D mass != 1.
         /// </summary>
         private bool ClearsHeight(SkiingController controller)
         {
             if (_heightMeters <= 0f) return true;
-            var cfg = controller.Config;
-            if (cfg == null) return true; // fail-open: if config missing, assume any jump clears
-
-            float g = Mathf.Abs(Physics2D.gravity.y) * cfg.gravityScale;
-            if (g <= 0f) return true;
-
-            float maxHeight = (cfg.jumpForce * cfg.jumpForce) / (2f * g);
-            return _heightMeters <= maxHeight;
+            return _heightMeters <= controller.MaxJumpHeight;
         }
     }
 }
