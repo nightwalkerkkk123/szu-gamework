@@ -12,20 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 877ee5e26ae465b4481802f22dd74af8, type: 3}
   m_Name: SkiingConfig
   m_EditorClassIdentifier: 
-  baseAcceleration: 9
+  baseAcceleration: 8
   maxSpeed: 16
   groundFriction: 2
   slopeAngle: 12
   jumpForce: 14
   gravityScale: 2.5
   airControl: 0.4
+  coyoteTime: 0.1
+  jumpBufferTime: 0.1
+  landingBounce: 2
   rollDuration: 0.6
   rollCooldown: 0.3
   rollSpeedBoost: 4
+  rollInitialBoost: 3
+  rollHitboxHeightScale: 0.5
   groundMask:
     serializedVersion: 2
     m_Bits: 256
   groundCheckOffset: 0.78
-  groundCheckDistance: 0.15
-  stumbleSpeedFactor: 0.4
+  groundCheckDistance: 0.45
+  stumbleSpeedFactor: 0.55
   stumbleDuration: 0.8
