@@ -382,30 +382,26 @@ namespace SugarRush.Editor
         private static void CreateBackground()
         {
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
-            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
-            var bgRoot = new GameObject("Background");
+            var mainCamGo = GameObject.Find("MainCamera");
+            if (mainCamGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
+            var mainCam = mainCamGo.GetComponent<Camera>();
+            float camHeight = mainCam.orthographicSize * 2f;
+            float camWidth = camHeight * mainCam.aspect;
 
-            // Main mountain background image
+            var bgRoot = new GameObject("Background");
+            bgRoot.transform.SetParent(mainCamGo.transform);
+            bgRoot.transform.localPosition = new Vector3(0f, 0f, 15f);
+
             var mountain = new GameObject("MountainBG");
             mountain.transform.SetParent(bgRoot.transform);
-            mountain.transform.position = new Vector3(1000f, -3f, 10f);
+            mountain.transform.localPosition = Vector3.zero;
+
             var mtnSR = mountain.AddComponent<SpriteRenderer>();
             mtnSR.sprite = bgSprite;
             mtnSR.color = Color.white;
-            mtnSR.drawMode = SpriteDrawMode.Tiled;
-            mtnSR.size = new Vector2(3000f, 40f);
-            mtnSR.sortingOrder = -10;
-
-            // Snow fill to cover the full track
-            var fill = new GameObject("SnowFill");
-            fill.transform.SetParent(bgRoot.transform);
-            fill.transform.position = new Vector3(1000f, -15f, 9f);
-            var fillSR = fill.AddComponent<SpriteRenderer>();
-            fillSR.sprite = whiteSprite;
-            fillSR.color = new Color(0.95f, 0.97f, 1f, 1f);
-            fillSR.drawMode = SpriteDrawMode.Tiled;
-            fillSR.size = new Vector2(3000f, 25f);
-            fillSR.sortingOrder = -8;
+            mtnSR.drawMode = SpriteDrawMode.Simple;
+            mtnSR.size = new Vector2(camWidth + 2f, camHeight + 2f);
+            mtnSR.sortingOrder = -20;
         }
 
         private static void CreateSnowParticles()
