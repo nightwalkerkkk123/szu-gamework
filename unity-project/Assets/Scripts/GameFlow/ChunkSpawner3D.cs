@@ -31,10 +31,18 @@ namespace SugarRush.GameFlow
         [SerializeField] private float _destroyDistance = 40f;
         [SerializeField] private int _initialChunkCount = 2;
 
+        [Header("Downhill Terrain")]
+        [Tooltip("Minimum vertical drop (units) between consecutive chunks. Track always descends — never rises — so the auto-running player never faces an un-climbable wall.")]
+        [SerializeField] private float _minDropPerChunk = 1f;
+        [Tooltip("Maximum vertical drop (units) between consecutive chunks. Larger spread = bumpier slope.")]
+        [SerializeField] private float _maxDropPerChunk = 6f;
+
         private float _nextChunkX;
+        private float _nextChunkY;
         private readonly List<GameObject> _activeChunks = new();
 
         public float NextChunkX => _nextChunkX;
+        public float NextChunkY => _nextChunkY;
 
         private void Start()
         {
@@ -99,14 +107,33 @@ namespace SugarRush.GameFlow
             var chunk = Instantiate(definition.Prefab, Vector3.zero, Quaternion.identity, transform);
             chunk.name = $"Chunk_{definition.Prefab.name}_{_activeChunks.Count}";
 
+            // These chunks were authored for a 2D side view: "Background" pieces are
+            // decoration that, in 3D forward view, become ugly floating blocks AND carry
+            // solid colliders intruding into the player's z=0 plane. Remove them entirely.
+            StripDecor(chunk);
+
             Bounds bounds = CalculateBounds(chunk);
 
-            // Align the chunk's start (left side) to _nextChunkX and its bottom to y = 0.
-            Vector3 position = new Vector3(_nextChunkX - bounds.min.x, -bounds.min.y, 0f);
+            // Align the chunk's start (left edge) to _nextChunkX and its bottom to the
+            // running descent height _nextChunkY. Chunks stay contiguous in X (always a
+            // landing ahead) while stepping DOWN in Y to form a rolling ski slope.
+            Vector3 position = new Vector3(_nextChunkX - bounds.min.x, _nextChunkY - bounds.min.y, 0f);
             chunk.transform.position = position;
 
             _activeChunks.Add(chunk);
             _nextChunkX += bounds.size.x;
+            _nextChunkY -= Random.Range(_minDropPerChunk, _maxDropPerChunk);
+        }
+
+        private static void StripDecor(GameObject root)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name.StartsWith("Background"))
+                {
+                    t.gameObject.SetActive(false);
+                }
+            }
         }
 
         private static Bounds CalculateBounds(GameObject root)

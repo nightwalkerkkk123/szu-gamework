@@ -145,3 +145,9 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# Large 3D model — 100MB obj exceeds GitHub's 100MB per-file limit.
+# L1 uses the 2D Tangtang_Ski.png sprite; this obj is for L2's 3D scene.
+# When L2 needs it, bring it in via git-lfs instead.
+unity-project/Assets/Art/Characters/Tangtang/Tangtang.obj
+unity-project/Assets/Art/Characters/Tangtang/Tangtang.obj.meta
