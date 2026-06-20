@@ -35,6 +35,12 @@ dist/
 *.dylib
 *.app
 
+# Vendored Entitas 1.6.1 framework — distributed as DLLs; must override *.dll
+# above or the whole ECS layer disappears from the repo (root cause of the
+# "Entitas could not be found" build errors).
+!unity-project/Assets/Plugins/Entitas/**/*.dll
+!unity-project/Assets/Plugins/DesperateDevs/**/*.dll
+
 # === Engine: Godot ===
 .godot/
 *.translation
