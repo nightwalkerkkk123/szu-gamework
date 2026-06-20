@@ -33,8 +33,7 @@ namespace SugarRush.Foundation
             if (_levelManager == null) _levelManager = FindObjectOfType<LevelManager>();
             if (_playerController == null)
             {
-                var bridge = FindObjectOfType<EntitasPlayerBridge>();
-                if (bridge != null) _playerController = bridge;
+                _playerController = FindObjectOfType<SkiingController>();
             }
             if (_glucoseSystem == null) _glucoseSystem = FindObjectOfType<GlucoseSystem>();
         }
