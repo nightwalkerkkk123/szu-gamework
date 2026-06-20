@@ -292,9 +292,6 @@ namespace SugarRush.Editor
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
 
-            CreateSki(go.transform, new Vector2(-0.25f, -0.75f));
-            CreateSki(go.transform, new Vector2(0.25f, -0.75f));
-
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 2.5f;
             rb.freezeRotation = true;
