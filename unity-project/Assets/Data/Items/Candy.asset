@@ -15,5 +15,5 @@ MonoBehaviour:
   <DisplayName>k__BackingField: Candy Health Pack
   <Description>k__BackingField: Green star candy that restores blood sugar. Heals
     +15 glucose.
-  <Icon>k__BackingField: {fileID: 0}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 10a41e7cd97134dcfbf9f7853741a058, type: 3}
   _instantDelta: 15
