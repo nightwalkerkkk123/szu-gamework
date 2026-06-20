@@ -385,11 +385,9 @@ namespace SugarRush.Editor
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/Mountain_BG.png");
             var camGo = GameObject.Find("MainCamera");
             if (camGo == null) { Debug.LogWarning("[L1SceneBuilder] MainCamera not found for background."); return; }
-            var cam = camGo.GetComponent<Camera>();
-            float camHeight = cam.orthographicSize * 2f;
-            float camWidth = camHeight * cam.aspect;
 
-            // 3D sprite background attached to camera, scaled to fill screen + 10% margin
+            // 3D sprite background attached to camera with fixed large scale
+            // (avoids edge bleeding from varying game-view aspect ratios)
             var bgRoot = new GameObject("Background");
             bgRoot.transform.SetParent(camGo.transform);
             bgRoot.transform.localPosition = new Vector3(0f, 0f, 20f);
@@ -397,18 +395,13 @@ namespace SugarRush.Editor
             var mountain = new GameObject("MountainBG");
             mountain.transform.SetParent(bgRoot.transform);
             mountain.transform.localPosition = Vector3.zero;
+            mountain.transform.localScale = new Vector3(20f, 20f, 1f);
 
             var sr = mountain.AddComponent<SpriteRenderer>();
             sr.sprite = bgSprite;
             sr.color = Color.white;
             sr.drawMode = SpriteDrawMode.Simple;
             sr.sortingOrder = -100;
-
-            // Scale with 10% margin to prevent blue edge bleed
-            float spriteW = bgSprite.bounds.size.x;
-            float spriteH = bgSprite.bounds.size.y;
-            float scale = Mathf.Max(camWidth / spriteW, camHeight / spriteH) * 1.1f;
-            mountain.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
         private static void CreateSnowParticles()
