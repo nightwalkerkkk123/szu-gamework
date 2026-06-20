@@ -24,11 +24,11 @@ namespace SugarRush.Editor
             SceneManager.SetActiveScene(scene);
 
             LoadAssets(out var glucoseConfig, out var skiingConfig, out var levelData,
-                out var insulin, out var pills, out var snowflake, out var slipperyGround);
+                out var insulin, out var pills, out var snowflake, out var candy, out var slipperyGround);
 
             GameConfig.Initialize(glucoseConfig, skiingConfig, levelData);
 
-            var segments = EnsureSegments(levelData, insulin, pills, snowflake);
+            var segments = EnsureSegments(levelData, insulin, pills, snowflake, candy);
 
             var player = CreatePlayer(glucoseConfig, skiingConfig, slipperyGround);
             var inputGo = CreateInput();
@@ -61,7 +61,7 @@ namespace SugarRush.Editor
 
         private static void LoadAssets(out GlucoseConfig glucose, out SkiingConfig skiing,
             out LevelData level, out InsulinSprayEffect insulin, out HypoglycemicPillsEffect pills,
-            out HighSugarSnowflakeEffect snowflake, out PhysicsMaterial2D slipperyGround)
+            out HighSugarSnowflakeEffect snowflake, out CandyEffect candy, out PhysicsMaterial2D slipperyGround)
         {
             glucose = AssetDatabase.LoadAssetAtPath<GlucoseConfig>("Assets/Data/Configs/GlucoseConfig.asset");
             skiing = AssetDatabase.LoadAssetAtPath<SkiingConfig>("Assets/Data/Configs/SkiingConfig.asset");
@@ -69,11 +69,13 @@ namespace SugarRush.Editor
             insulin = AssetDatabase.LoadAssetAtPath<InsulinSprayEffect>("Assets/Data/Items/InsulinSpray.asset");
             pills = AssetDatabase.LoadAssetAtPath<HypoglycemicPillsEffect>("Assets/Data/Items/HypoglycemicPills.asset");
             snowflake = AssetDatabase.LoadAssetAtPath<HighSugarSnowflakeEffect>("Assets/Data/Items/HighSugarSnowflake.asset");
+            candy = AssetDatabase.LoadAssetAtPath<CandyEffect>("Assets/Data/Items/Candy.asset");
             slipperyGround = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>("Assets/Data/PhysicsMaterials/SlipperyGround.physicsMaterial2D");
         }
 
         private static List<LevelSegmentData> EnsureSegments(LevelData level,
-            InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake)
+            InsulinSprayEffect insulin, HypoglycemicPillsEffect pills, HighSugarSnowflakeEffect snowflake,
+            CandyEffect candy)
         {
             string folder = "Assets/Data/Segments";
             EnsureFolder(folder);
@@ -109,12 +111,17 @@ namespace SugarRush.Editor
                 });
 
             // 3. FirstRoll (250m, 12°) — three Rollable to teach rolling (invuln).
+            //    Candy health pack placed between obstacles as a safety net.
             var segment3 = CreateSegmentAsset($"{folder}/L1_Segment_FirstRoll.asset", "L1_FirstRoll", 250f, 12f,
                 obstacles: new SegmentObstacle[]
                 {
                     new SegmentObstacle { DistanceAlongSegment = 50f,  HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
                     new SegmentObstacle { DistanceAlongSegment = 130f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor },
                     new SegmentObstacle { DistanceAlongSegment = 200f, HeightOffset = 0.4f, Type = Obstacle.ObstacleType.Rollable, Size = new Vector2(1.5f, 0.4f), Color = rollableColor }
+                },
+                pickups: new SegmentPickup[]
+                {
+                    new SegmentPickup { DistanceAlongSegment = 160f, HeightOffset = 1.2f, ItemEffect = candy, Color = Color.green }
                 });
 
             // 4. ItemTutorial (250m, 12°) — pickup-only, teaches auto-pickup and item use.
@@ -135,6 +142,7 @@ namespace SugarRush.Editor
                 },
                 pickups: new SegmentPickup[]
                 {
+                    new SegmentPickup { DistanceAlongSegment = 150f, HeightOffset = 1.2f, ItemEffect = candy, Color = Color.green },
                     new SegmentPickup { DistanceAlongSegment = 250f, HeightOffset = 1.5f, ItemEffect = pills, Color = Color.green }
                 },
                 hazards: new SegmentHazard[]
@@ -153,6 +161,7 @@ namespace SugarRush.Editor
                 },
                 pickups: new SegmentPickup[]
                 {
+                    new SegmentPickup { DistanceAlongSegment = 40f,  HeightOffset = 1.2f, ItemEffect = candy, Color = Color.green },
                     new SegmentPickup { DistanceAlongSegment = 220f, HeightOffset = 1.5f, ItemEffect = snowflake, Color = Color.yellow }
                 },
                 hazards: new SegmentHazard[]
