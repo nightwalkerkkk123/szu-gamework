@@ -241,13 +241,13 @@ namespace SugarRush.Editor
 
             var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
 
-            // Body — blue ski jacket
+            // Body — white ski jacket
             var bodyGO = new GameObject("Body");
             bodyGO.transform.SetParent(go.transform);
             bodyGO.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             var bodySR = bodyGO.AddComponent<SpriteRenderer>();
             bodySR.sprite = whiteSprite;
-            bodySR.color = new Color(0.15f, 0.3f, 0.75f, 1f);
+            bodySR.color = Color.white;
             bodySR.drawMode = SpriteDrawMode.Sliced;
             bodySR.size = new Vector2(0.65f, 1.1f);
             bodySR.sortingOrder = 1;
