@@ -10,29 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 3}
-  m_Name: L1_Segment_ColdWind
+  m_Name: L1_Segment_ItemTutorial
   m_EditorClassIdentifier: 
-  <SegmentId>k__BackingField: L1_ColdWind
-  <Length>k__BackingField: 60
+  <SegmentId>k__BackingField: L1_ItemTutorial
+  <Length>k__BackingField: 250
   <SlopeAngle>k__BackingField: 12
   <GroundPieceLength>k__BackingField: 12
   <HasGap>k__BackingField: 0
   <GapStartRatio>k__BackingField: 0
   <GapEndRatio>k__BackingField: 0
   <GapDepth>k__BackingField: 8
-  <Obstacles>k__BackingField:
-  - DistanceAlongSegment: 45
-    HeightOffset: 0.4
-    Type: 0
-    Size: {x: 0.8, y: 0.8}
-    Color: {r: 0.55, g: 0.4, b: 0.35, a: 1}
+  <Obstacles>k__BackingField: []
   <Pickups>k__BackingField:
-  - DistanceAlongSegment: 30
+  - DistanceAlongSegment: 80
+    HeightOffset: 1.5
+    ItemEffect: {fileID: 11400000, guid: 391f278e3a3db584ba637fda5c3c3b7a, type: 2}
+    Color: {r: 0, g: 0, b: 1, a: 1}
+  - DistanceAlongSegment: 180
     HeightOffset: 1.5
     ItemEffect: {fileID: 11400000, guid: 57f40414e08ad4e4983f7dbdaf87fd5c, type: 2}
     Color: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  <Hazards>k__BackingField:
-  - DistanceAlongSegment: 10
-    CenterHeightOffset: 4
-    Size: {x: 20, y: 8}
-    DeltaPerSecond: -5
+  <Hazards>k__BackingField: []

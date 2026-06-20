@@ -21,6 +21,10 @@ MonoBehaviour:
   <BaseScore>k__BackingField: 1000
   <TimeBonusMultiplier>k__BackingField: 10
   <Segments>k__BackingField:
-  - {fileID: 11400000, guid: 4bf550269adb37c4bbe3e62b0af29dc8, type: 2}
-  - {fileID: 11400000, guid: 0e0d72ba113d8be449a97d8bf18b6c93, type: 2}
-  - {fileID: 11400000, guid: d8e76a069db832a439f3c3118189c6aa, type: 2}
+  - {fileID: 11400000, guid: 1678be3971b544bde996569dd76c4ec8, type: 2}
+  - {fileID: 11400000, guid: 1534bdb06600c48859fdaaff78d56c48, type: 2}
+  - {fileID: 11400000, guid: b57a34788254f451db431188c4029c97, type: 2}
+  - {fileID: 11400000, guid: 1c1de14f4b2ef4a648c9379e0a38526f, type: 2}
+  - {fileID: 11400000, guid: 0cff48ff34b1240d8b38ce6c93991d1a, type: 2}
+  - {fileID: 11400000, guid: 460d940a6b467401796344f93880a381, type: 2}
+  - {fileID: 11400000, guid: 5476f5fcf786b437a8c0b62e6c8f0de4, type: 2}
