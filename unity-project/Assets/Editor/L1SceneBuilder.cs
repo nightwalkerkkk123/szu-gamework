@@ -648,15 +648,20 @@ namespace SugarRush.Editor
 
         private static void CreatePickup(Transform parent, string name, Vector3 pos, ItemEffect effect, Color color)
         {
-            var go = CreateSpriteObject(parent, name, pos, new Vector2(0.5f, 0.5f), color);
+            var go = CreateSpriteObject(parent, name, pos, new Vector2(1.5f, 1.5f), color);
             // Use the ItemEffect's Icon sprite if available, otherwise keep white placeholder
             if (effect != null && effect.Icon != null)
             {
                 var sr = go.GetComponent<SpriteRenderer>();
-                if (sr != null) sr.sprite = effect.Icon;
+                if (sr != null)
+                {
+                    sr.sprite = effect.Icon;
+                    sr.color = Color.white; // Show true sprite colors, not tinted
+                }
             }
             var trigger = go.AddComponent<CircleCollider2D>();
             trigger.isTrigger = true;
+            trigger.radius = 1.0f;
             var pickup = go.AddComponent<PickupItem>();
             SetField(pickup, "_itemEffect", effect);
         }
