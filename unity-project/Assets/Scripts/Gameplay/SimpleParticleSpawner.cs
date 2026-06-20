@@ -54,8 +54,12 @@ namespace SugarRush.Gameplay
             var obstacle = GetComponent<Obstacle>(); // won't exist on player, but harmless
         }
 
+        private bool _isDestroyed;
+
         private void OnDestroy()
         {
+            _isDestroyed = true;
+
             var skiing = GetComponent<SkiingController>();
             if (skiing != null)
             {
@@ -111,6 +115,7 @@ namespace SugarRush.Gameplay
 
         private void SpawnParticle(Vector3 position, Vector2 velocity, float life, Color color, float startScale, float endScale)
         {
+            if (_isDestroyed) return;
             var go = new GameObject("Particle");
             go.transform.position = position;
 
