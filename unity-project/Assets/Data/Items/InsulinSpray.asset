@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <DisplayName>k__BackingField: "\u80F0\u5C9B\u7D20\u55B7\u96FE"
   <Description>k__BackingField: "\u7ACB\u5373\u964D\u4F4E\u8840\u7CD6 30 \u70B9\u3002"
-  <Icon>k__BackingField: {fileID: 0}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 045a4c8e252a044cc8c1742d6ffbaf16, type: 3}
   _instantDelta: -15
