@@ -41,6 +41,10 @@ namespace SugarRush.GameFlow
         private float _nextChunkY;
         private readonly List<GameObject> _activeChunks = new();
 
+        // [DIAG] Temporary instrumentation — remove once the "track runs out" bug is root-caused.
+        private float _diagTimer;
+        private int _diagSpawnCount;
+
         public float NextChunkX => _nextChunkX;
         public float NextChunkY => _nextChunkY;
 
@@ -69,9 +73,21 @@ namespace SugarRush.GameFlow
 
         private void Update()
         {
-            if (_player == null) return;
+            if (_player == null)
+            {
+                Debug.LogWarning("[ChunkSpawner3D-DIAG] _player is NULL — generation halted, only initial chunks exist.");
+                return;
+            }
 
             float playerX = _player.position.x;
+
+            // [DIAG] Heartbeat: shows whether playerX advances and the spawn frontier keeps up.
+            _diagTimer += Time.deltaTime;
+            if (_diagTimer >= 1f)
+            {
+                _diagTimer = 0f;
+                Debug.Log($"[ChunkSpawner3D-DIAG] heartbeat playerX={playerX:F1} playerY={_player.position.y:F1} nextChunkX={_nextChunkX:F1} frontierGap={_nextChunkX - playerX:F1} active={_activeChunks.Count} totalSpawned={_diagSpawnCount}");
+            }
 
             while (playerX + _spawnDistance > _nextChunkX)
             {
@@ -121,8 +137,45 @@ namespace SugarRush.GameFlow
             chunk.transform.position = position;
 
             _activeChunks.Add(chunk);
+
+            // [DIAG] Log placement + scan for holes in the walkable ground. These chunks come
+            // from a 2D jump-runner; if the floor has gaps the auto-rolling sphere falls in.
+            _diagSpawnCount++;
+            float startX = _nextChunkX;
+            float endX = _nextChunkX + bounds.size.x;
+            float biggestGap = LargestGroundGapX(chunk);
+            Debug.Log($"[ChunkSpawner3D-DIAG] spawn #{_diagSpawnCount} {chunk.name} X[{startX:F1}..{endX:F1}] boundsW={bounds.size.x:F1} defWidth={definition.Width} topY={bounds.max.y:F1} biggestFloorGapX={biggestGap:F1}");
+            if (biggestGap > 1.5f)
+            {
+                Debug.LogWarning($"[ChunkSpawner3D-DIAG] HOLE in {chunk.name}: {biggestGap:F1}-unit gap in the floor — the rolling sphere will fall through here.");
+            }
+
             _nextChunkX += bounds.size.x;
             _nextChunkY -= Random.Range(_minDropPerChunk, _maxDropPerChunk);
+        }
+
+        // [DIAG] Largest horizontal gap between the active, non-trigger floor colliders of a
+        // chunk. A large value means the walkable surface has a hole the sphere will fall into.
+        private static float LargestGroundGapX(GameObject root)
+        {
+            var intervals = new List<Vector2>(); // (minX, maxX) per solid collider
+            foreach (var c in root.GetComponentsInChildren<Collider>())
+            {
+                if (c.isTrigger || !c.gameObject.activeInHierarchy) continue;
+                intervals.Add(new Vector2(c.bounds.min.x, c.bounds.max.x));
+            }
+            if (intervals.Count <= 1) return 0f;
+
+            intervals.Sort((a, b) => a.x.CompareTo(b.x));
+            float biggest = 0f;
+            float coveredTo = intervals[0].y;
+            for (int i = 1; i < intervals.Count; i++)
+            {
+                float gap = intervals[i].x - coveredTo;
+                if (gap > biggest) biggest = gap;
+                if (intervals[i].y > coveredTo) coveredTo = intervals[i].y;
+            }
+            return biggest;
         }
 
         private static void StripDecor(GameObject root)
