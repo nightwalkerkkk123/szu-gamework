@@ -9,7 +9,7 @@ namespace SugarRush.Gameplay.Items
     [CreateAssetMenu(fileName = "HighSugarSnowflake", menuName = "SugarRush/Items/High Sugar Snowflake")]
     public class HighSugarSnowflakeEffect : ItemEffect
     {
-        [SerializeField, Range(0f, 100f)] private float _instantDelta = 25f;
+        [SerializeField, Range(0f, 100f)] private float _instantDelta = 10f;
         [SerializeField, Min(0.1f)] private float _speedBoostDuration = 3f;
         [SerializeField] private float _speedBoostMultiplier = 1.15f;
 

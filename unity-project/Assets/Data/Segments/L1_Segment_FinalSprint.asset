@@ -40,6 +40,10 @@ MonoBehaviour:
     Size: {x: 1.2, y: 1.2}
     Color: {r: 0.8, g: 0.2, b: 0.15, a: 1}
   <Pickups>k__BackingField:
+  - DistanceAlongSegment: 40
+    HeightOffset: 1.2
+    ItemEffect: {fileID: 11400000, guid: 69b62a99322704d7299b4488b24e84ca, type: 2}
+    Color: {r: 0, g: 1, b: 0, a: 1}
   - DistanceAlongSegment: 220
     HeightOffset: 1.5
     ItemEffect: {fileID: 11400000, guid: 57f40414e08ad4e4983f7dbdaf87fd5c, type: 2}

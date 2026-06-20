@@ -15,7 +15,7 @@ namespace SugarRush.Gameplay
         [SerializeField] private GlucoseSystem _glucoseSystem;
 
         [Header("Glucose Colors")]
-        [SerializeField] private Color _normalColor = Color.cyan;
+        [SerializeField] private Color _normalColor = Color.white;
         [SerializeField] private Color _lowWarningColor = new Color(0.5f, 0.75f, 1f, 1f);
         [SerializeField] private Color _lowCrisisColor = new Color(0.25f, 0.45f, 0.9f, 1f);
         [SerializeField] private Color _highWarningColor = new Color(1f, 0.75f, 0.4f, 1f);

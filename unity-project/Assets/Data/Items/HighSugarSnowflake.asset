@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4860cbbb112eb80428bd57c8cd7dda18, type: 3}
   m_Name: HighSugarSnowflake
   m_EditorClassIdentifier: 
-  <DisplayName>k__BackingField: 高糖雪花
-  <Description>k__BackingField: 立即 +25 血糖，并在 3 秒内提供临时速度加成。
-  <Icon>k__BackingField: {fileID: 0}
-  _instantDelta: 25
+  <DisplayName>k__BackingField: "\u9AD8\u7CD6\u96EA\u82B1"
+  <Description>k__BackingField: "\u7ACB\u5373 +25 \u8840\u7CD6\uFF0C\u5E76\u5728
+    3 \u79D2\u5185\u63D0\u4F9B\u4E34\u65F6\u901F\u5EA6\u52A0\u6210\u3002"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 6954bf1686a824dc5a752e2d05f1ff8f, type: 3}
+  _instantDelta: 10
   _speedBoostDuration: 3
   _speedBoostMultiplier: 1.15
