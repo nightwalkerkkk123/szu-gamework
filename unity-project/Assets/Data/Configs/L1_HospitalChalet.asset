@@ -21,10 +21,10 @@ MonoBehaviour:
   <BaseScore>k__BackingField: 1000
   <TimeBonusMultiplier>k__BackingField: 10
   <Segments>k__BackingField:
-  - {fileID: 11400000, guid: c3d381a81ddc41942961f437828c6e5e, type: 2}
-  - {fileID: 11400000, guid: c46e19254dfaba5418b20021e0eb8c28, type: 2}
-  - {fileID: 11400000, guid: 3b6a8595b1793cc4baa2da8a386074a9, type: 2}
-  - {fileID: 11400000, guid: f6aee0e46c2ee174d91f31505e758a04, type: 2}
-  - {fileID: 11400000, guid: 4ea3e3d4dcbbb6744a48efb13b56cc70, type: 2}
-  - {fileID: 11400000, guid: 38928bc5ba435f149a99958277be396e, type: 2}
-  - {fileID: 11400000, guid: d4da6cfd2d07eda458a3040c3e74a33f, type: 2}
+  - {fileID: 11400000, guid: 1678be3971b544bde996569dd76c4ec8, type: 2}
+  - {fileID: 11400000, guid: 1534bdb06600c48859fdaaff78d56c48, type: 2}
+  - {fileID: 11400000, guid: b57a34788254f451db431188c4029c97, type: 2}
+  - {fileID: 11400000, guid: 1c1de14f4b2ef4a648c9379e0a38526f, type: 2}
+  - {fileID: 11400000, guid: 0cff48ff34b1240d8b38ce6c93991d1a, type: 2}
+  - {fileID: 11400000, guid: 460d940a6b467401796344f93880a381, type: 2}
+  - {fileID: 11400000, guid: 5476f5fcf786b437a8c0b62e6c8f0de4, type: 2}

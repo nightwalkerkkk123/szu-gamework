@@ -60,9 +60,9 @@ namespace SugarRush.GameFlow
 
             if (_player == null)
             {
-                var bridge = FindObjectOfType<EntitasPlayerBridge>();
-                if (bridge != null && bridge.PlayerTransform != null)
-                    _player = bridge.PlayerTransform;
+                var skiing = FindObjectOfType<SkiingController>();
+                if (skiing != null)
+                    _player = skiing.transform;
             }
 
             if (_startPoint == null)

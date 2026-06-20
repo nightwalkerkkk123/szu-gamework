@@ -36,6 +36,8 @@ namespace SugarRush.Editor
             CreateCamera(player.transform);
             CreateLighting();
             CreateLevelFromSegments(segments, slipperyGround, player.GetComponent<GlucoseSystem>());
+            CreateBackground();
+            CreateSnowParticles();
             CreateGapDeathZone();
             var flow = CreateGameFlow(input, player, levelData);
             CreateUI(player, flow.GetComponent<LevelManager>());
@@ -220,14 +222,61 @@ namespace SugarRush.Editor
             go.tag = "Player";
             go.transform.position = new Vector3(0f, 1.5f, 0f);
 
+            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+
+            // Body — blue ski jacket
+            var bodyGO = new GameObject("Body");
+            bodyGO.transform.SetParent(go.transform);
+            bodyGO.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+            var bodySR = bodyGO.AddComponent<SpriteRenderer>();
+            bodySR.sprite = whiteSprite;
+            bodySR.color = new Color(0.15f, 0.3f, 0.75f, 1f);
+            bodySR.drawMode = SpriteDrawMode.Sliced;
+            bodySR.size = new Vector2(0.65f, 1.1f);
+            bodySR.sortingOrder = 1;
+
+            // Head
+            var headGO = new GameObject("Head");
+            headGO.transform.SetParent(go.transform);
+            headGO.transform.localPosition = new Vector3(0f, 0.75f, 0f);
+            var headSR = headGO.AddComponent<SpriteRenderer>();
+            headSR.sprite = whiteSprite;
+            headSR.color = new Color(1f, 0.82f, 0.7f, 1f);
+            headSR.drawMode = SpriteDrawMode.Sliced;
+            headSR.size = new Vector2(0.5f, 0.5f);
+            headSR.sortingOrder = 2;
+
+            // Red hat
+            var hatGO = new GameObject("Hat");
+            hatGO.transform.SetParent(headGO.transform);
+            hatGO.transform.localPosition = new Vector3(0f, 0.22f, 0f);
+            var hatSR = hatGO.AddComponent<SpriteRenderer>();
+            hatSR.sprite = whiteSprite;
+            hatSR.color = new Color(0.85f, 0.15f, 0.15f, 1f);
+            hatSR.drawMode = SpriteDrawMode.Sliced;
+            hatSR.size = new Vector2(0.55f, 0.3f);
+            hatSR.sortingOrder = 3;
+
+            // Yellow scarf
+            var scarfGO = new GameObject("Scarf");
+            scarfGO.transform.SetParent(go.transform);
+            scarfGO.transform.localPosition = new Vector3(0.15f, 0.45f, -0.02f);
+            var scarfSR = scarfGO.AddComponent<SpriteRenderer>();
+            scarfSR.sprite = whiteSprite;
+            scarfSR.color = new Color(1f, 0.85f, 0.2f, 1f);
+            scarfSR.drawMode = SpriteDrawMode.Sliced;
+            scarfSR.size = new Vector2(0.4f, 0.15f);
+            scarfSR.sortingOrder = 2;
+
+            // Main SpriteRenderer for PlayerVisuals reference
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
-            sr.color = Color.cyan;
+            sr.sprite = whiteSprite;
+            sr.color = new Color(1f, 1f, 1f, 0f); // invisible — children provide the visuals
             sr.drawMode = SpriteDrawMode.Sliced;
             sr.size = new Vector2(0.8f, 1.6f);
 
-            CreateSki(sr.transform, new Vector2(-0.25f, -0.7f));
-            CreateSki(sr.transform, new Vector2(0.25f, -0.7f));
+            CreateSki(go.transform, new Vector2(-0.25f, -0.75f));
+            CreateSki(go.transform, new Vector2(0.25f, -0.75f));
 
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 2.5f;
@@ -248,12 +297,12 @@ namespace SugarRush.Editor
             CreateSkiTrail(go.transform, skiing, glucose);
 
             var visuals = go.AddComponent<PlayerVisuals>();
-            SetField(visuals, "_bodyRenderer", sr);
+            SetField(visuals, "_bodyRenderer", bodySR);
             SetField(visuals, "_skiingController", skiing);
             SetField(visuals, "_glucoseSystem", glucose);
 
             var particles = go.AddComponent<SimpleParticleSpawner>();
-            SetField(particles, "_particleSprite", sr.sprite);
+            SetField(particles, "_particleSprite", whiteSprite);
 
             var inventory = go.AddComponent<PlayerInventory>();
             SetField(inventory, "_glucoseSystem", glucose);
@@ -313,6 +362,101 @@ namespace SugarRush.Editor
             lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
         }
 
+        private static void CreateBackground()
+        {
+            var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+            var bgRoot = new GameObject("Background");
+
+            // Sky gradient (far background)
+            var sky = new GameObject("Sky");
+            sky.transform.SetParent(bgRoot.transform);
+            sky.transform.position = new Vector3(90f, 3f, 15f);
+            var skySR = sky.AddComponent<SpriteRenderer>();
+            skySR.sprite = whiteSprite;
+            skySR.color = new Color(0.7f, 0.85f, 0.95f, 1f);
+            skySR.drawMode = SpriteDrawMode.Tiled;
+            skySR.size = new Vector2(60f, 12f);
+            skySR.sortingOrder = -30;
+            skySR.tileMode = SpriteTileMode.Continuous;
+
+            // Far mountains
+            for (int i = 0; i < 4; i++)
+            {
+                var mountain = new GameObject($"Mountain_Far_{i}");
+                mountain.transform.SetParent(bgRoot.transform);
+                mountain.transform.position = new Vector3(-20 + i * 55f, -2f - i * 0.5f, 12f);
+                var sr = mountain.AddComponent<SpriteRenderer>();
+                sr.sprite = whiteSprite;
+                sr.color = new Color(0.5f + i * 0.05f, 0.6f + i * 0.05f, 0.75f + i * 0.05f, 1f);
+                sr.drawMode = SpriteDrawMode.Tiled;
+                sr.tileMode = SpriteTileMode.Continuous;
+                sr.size = new Vector2(20f, 4f + i * 1.5f);
+                sr.sortingOrder = -25 + i;
+            }
+
+            // Snow-covered ground plane at horizon
+            var snowPlain = new GameObject("SnowPlain");
+            snowPlain.transform.SetParent(bgRoot.transform);
+            snowPlain.transform.position = new Vector3(90f, -4f, 10f);
+            var plainSR = snowPlain.AddComponent<SpriteRenderer>();
+            plainSR.sprite = whiteSprite;
+            plainSR.color = new Color(0.93f, 0.96f, 1f, 0.85f);
+            plainSR.drawMode = SpriteDrawMode.Tiled;
+            plainSR.tileMode = SpriteTileMode.Continuous;
+            plainSR.size = new Vector2(60f, 4f);
+            plainSR.sortingOrder = -20;
+        }
+
+        private static void CreateSnowParticles()
+        {
+            var go = new GameObject("SnowParticles");
+            go.transform.position = new Vector3(90f, 8f, 0f);
+
+            var ps = go.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.duration = 60f;
+            main.loop = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(4f, 8f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.3f, 1.5f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.2f);
+            main.startColor = new Color(1f, 1f, 1f, 0.6f);
+            main.maxParticles = 120;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.gravityModifier = 0.02f;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 25f;
+
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(200f, 0.1f, 1f);
+            shape.position = new Vector3(0f, 5f, 0f);
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.material = new Material(Shader.Find("Sprites/Default"));
+        }
+
+        private static void CreateContinuousGround(GameObject groundRoot, int groundLayer, PhysicsMaterial2D physicsMat,
+            float startX, float startY, float length, float slopeAngle, int id)
+        {
+            float rad = slopeAngle * Mathf.Deg2Rad;
+            float halfLen = length * 0.5f;
+            float centerX = startX + halfLen * Mathf.Cos(rad);
+            float centerY = startY - halfLen * Mathf.Sin(rad);
+
+            var go = new GameObject($"GroundCollider_{id}");
+            go.transform.SetParent(groundRoot.transform);
+            go.transform.position = new Vector3(centerX, centerY, 0f);
+            go.transform.rotation = Quaternion.Euler(0f, 0f, -slopeAngle);
+            go.layer = groundLayer;
+
+            var col = go.AddComponent<BoxCollider2D>();
+            col.size = new Vector2(length + 1.5f, 3f);
+            col.offset = new Vector2(0f, -0.3f);
+            col.sharedMaterial = physicsMat;
+        }
+
         private static void CreateLevelFromSegments(List<LevelSegmentData> segments, PhysicsMaterial2D slipperyGround, GlucoseSystem glucoseSystem)
         {
             if (segments == null || segments.Count == 0)
@@ -354,35 +498,74 @@ namespace SugarRush.Editor
                 int pieces = Mathf.Max(1, Mathf.CeilToInt(segment.Length / segment.GroundPieceLength));
                 float pieceLength = segment.Length / pieces;
 
+                // First pass: create one continuous collider per continuous block
+                // This eliminates gaps between individual platforms
+                float segStartX = currentX;
+                float segStartY = currentY;
+                float segEndX = currentX + segmentWorldDX;
+                float segEndY = currentY - segmentWorldDY;
+
+                if (segment.HasGap)
+                {
+                    // Gap segment: create two continuous colliders (before gap, after gap)
+                    float gapStartDist = segment.GapStartRatio * segment.Length;
+                    float gapEndDist = segment.GapEndRatio * segment.Length;
+
+                    // Pre-gap block
+                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
+                        currentX, currentY, gapStartDist, segment.SlopeAngle, platformIndex);
+
+                    // Post-gap block
+                    float postGapStartX = currentX + gapEndDist * cos;
+                    float postGapStartY = currentY - gapEndDist * sin;
+                    float postGapLength = segment.Length - gapEndDist;
+                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
+                        postGapStartX, postGapStartY, postGapLength, segment.SlopeAngle, platformIndex + 100);
+                }
+                else
+                {
+                    // No gap: one single continuous collider for the whole segment
+                    CreateContinuousGround(groundRoot, groundLayer, slipperyGround,
+                        currentX, currentY, segment.Length, segment.SlopeAngle, platformIndex);
+                }
+
+                // Second pass: create visual sprites (decorative, no colliders needed)
                 for (int i = 0; i < pieces; i++)
                 {
                     float tCenter = (i + 0.5f) / pieces;
 
-                    // Skip ground pieces inside the gap.
+                    // Skip visual pieces inside the gap.
                     if (segment.HasGap && tCenter >= segment.GapStartRatio && tCenter <= segment.GapEndRatio)
-                    {
                         continue;
-                    }
 
                     float centerDistance = tCenter * segment.Length;
                     float x = currentX + centerDistance * cos;
                     float y = currentY - centerDistance * sin;
 
-                    var platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    platform.name = $"Platform_{platformIndex++}";
+                    // Visual snow sprite only (collider is on the continuous ground)
+                    var platform = new GameObject($"Platform_{platformIndex++}");
                     platform.transform.SetParent(groundRoot.transform);
                     platform.transform.position = new Vector3(x, y, 0f);
-                    platform.transform.localScale = new Vector3(pieceLength, 1f, 1f);
                     platform.transform.rotation = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
 
-                    UnityEngine.Object.DestroyImmediate(platform.GetComponent<Collider>());
-                    var col = platform.AddComponent<BoxCollider2D>();
-                    col.size = new Vector2(1f, 1f);
-                    col.sharedMaterial = slipperyGround;
-                    platform.layer = groundLayer;
-                    var renderer = platform.GetComponent<Renderer>();
-                    renderer.sharedMaterial = new Material(renderer.sharedMaterial);
-                    renderer.sharedMaterial.color = new Color(0.9f, 0.95f, 1f);
+                    var sr = platform.AddComponent<SpriteRenderer>();
+                    var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
+                    sr.sprite = whiteSprite;
+                    sr.color = new Color(0.92f, 0.96f, 1f, 1f);
+                    sr.drawMode = SpriteDrawMode.Tiled;
+                    sr.size = new Vector2(pieceLength, 1.2f);
+                    sr.sortingOrder = 0;
+
+                    // Snow overlay
+                    var overlay = new GameObject("SnowTop");
+                    overlay.transform.SetParent(platform.transform);
+                    overlay.transform.localPosition = new Vector3(0f, 0.55f, -0.01f);
+                    var overlaySR = overlay.AddComponent<SpriteRenderer>();
+                    overlaySR.sprite = whiteSprite;
+                    overlaySR.color = new Color(1f, 1f, 1f, 0.4f);
+                    overlaySR.drawMode = SpriteDrawMode.Tiled;
+                    overlaySR.size = new Vector2(pieceLength, 0.3f);
+                    overlaySR.sortingOrder = 1;
                 }
 
                 // Visual dark pit for gap.
@@ -605,15 +788,28 @@ namespace SugarRush.Editor
         {
             var hudGo = new GameObject("HUD");
             hudGo.transform.SetParent(canvas, false);
+
+            // Semi-transparent background panel for readability
+            var bgGo = new GameObject("HUDBackground");
+            bgGo.transform.SetParent(hudGo.transform, false);
+            var bgImage = bgGo.AddComponent<UnityEngine.UI.Image>();
+            bgImage.color = new Color(0f, 0f, 0f, 0.4f);
+            var bgRect = bgGo.GetComponent<RectTransform>();
+            bgRect.anchorMin = new Vector2(0f, 1f);
+            bgRect.anchorMax = new Vector2(0f, 1f);
+            bgRect.pivot = new Vector2(0f, 1f);
+            bgRect.anchoredPosition = new Vector2(8f, -8f);
+            bgRect.sizeDelta = new Vector2(440f, 165f);
+
             var hud = hudGo.AddComponent<HUD>();
             SetField(hud, "_levelManager", levelManager);
             SetField(hud, "_skiingController", player.GetComponent<SkiingController>());
             SetField(hud, "_glucoseSystem", player.GetComponent<GlucoseSystem>());
 
             var distanceText = CreateText(hudGo.transform, "DistanceText", new Vector2(20f, -60f), TextAnchor.UpperLeft);
-            var speedText = CreateText(hudGo.transform, "SpeedText", new Vector2(20f, -90f), TextAnchor.UpperLeft);
-            var timeText = CreateText(hudGo.transform, "TimeText", new Vector2(20f, -120f), TextAnchor.UpperLeft);
-            var glucoseText = CreateText(hudGo.transform, "GlucoseValueText", new Vector2(330f, -20f), TextAnchor.UpperLeft);
+            var speedText = CreateText(hudGo.transform, "SpeedText", new Vector2(20f, -95f), TextAnchor.UpperLeft);
+            var timeText = CreateText(hudGo.transform, "TimeText", new Vector2(20f, -130f), TextAnchor.UpperLeft);
+            var glucoseText = CreateText(hudGo.transform, "GlucoseValueText", new Vector2(20f, -25f), TextAnchor.UpperLeft);
 
             SetField(hud, "_distanceText", distanceText);
             SetField(hud, "_speedText", speedText);

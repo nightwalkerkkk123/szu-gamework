@@ -32,7 +32,7 @@ MonoBehaviour:
     Type: 3
     HeightMeters: 0
     Size: {x: 1.5, y: 0.4}
-    Color: {r: 0.4, g: 0.5, b: 0.6, a: 1}
+    Color: {r: 0.3, g: 0.2, b: 0.1, a: 1}
   - DistanceAlongSegment: 320
     HeightOffset: 0.4
     Type: 0
