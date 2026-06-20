@@ -214,7 +214,7 @@ MonoBehaviour:
   _groundCheckDistance: 0.55
   _groundMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1280
   _minSpeedMultiplier: 0.5
   _maxSpeedMultiplier: 1.25
   _fallDeathSeconds: 2
@@ -5778,7 +5778,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1262546421
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6173,13 +6173,13 @@ MonoBehaviour:
   _chunks:
   - Prefab: {fileID: 1765337216046484, guid: bba7301aa9a51534c92f0dd119823e8c, type: 3}
     Width: 170.5
-    Weight: 1
+    Weight: 0
   - Prefab: {fileID: 1948545188374932, guid: 29186620141f4ba4b93bdcab0a293921, type: 3}
     Width: 100.1
     Weight: 1
   - Prefab: {fileID: 1116578190969374, guid: e750b824e0113634cbff681d318ff7e9, type: 3}
     Width: 100.1
-    Weight: 0.5
+    Weight: 0
   _spawnDistance: 80
   _destroyDistance: 60
   _initialChunkCount: 2

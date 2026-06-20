@@ -41,14 +41,21 @@ public sealed class UnityInputService : Service, IInputService
 
         #region Keyboard
 
-        if (Input.GetKey(KeyCode.Space))
-        {
-            leftHitCounter++;
-        }
-
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        // Jump (right-side action): Space / W / Up.
+        // Space is the player's intuitive jump key; W/Up kept as alternates.
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
             rightHitCounter++;
+        }
+
+        // Switch color/type (left-side action): Left/Right Shift or arrow keys.
+        // The color-match mechanic is retained, but moved off Space so jumping no
+        // longer accidentally toggles the player's type into a lethal mismatch.
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)
+            || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow)
+            || Input.GetKey(KeyCode.DownArrow))
+        {
+            leftHitCounter++;
         }
 
         #endregion
