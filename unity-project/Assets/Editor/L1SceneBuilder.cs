@@ -389,7 +389,7 @@ namespace SugarRush.Editor
             float camHeight = cam.orthographicSize * 2f;
             float camWidth = camHeight * cam.aspect;
 
-            // 3D sprite background attached to camera (renders behind all game objects)
+            // 3D sprite background attached to camera, scaled to fill screen + 10% margin
             var bgRoot = new GameObject("Background");
             bgRoot.transform.SetParent(camGo.transform);
             bgRoot.transform.localPosition = new Vector3(0f, 0f, 20f);
@@ -404,9 +404,11 @@ namespace SugarRush.Editor
             sr.drawMode = SpriteDrawMode.Simple;
             sr.sortingOrder = -100;
 
+            // Scale with 10% margin to prevent blue edge bleed
             float spriteW = bgSprite.bounds.size.x;
             float spriteH = bgSprite.bounds.size.y;
-            mountain.transform.localScale = new Vector3(camWidth / spriteW, camHeight / spriteH, 1f);
+            float scale = Mathf.Max(camWidth / spriteW, camHeight / spriteH) * 1.1f;
+            mountain.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
         private static void CreateSnowParticles()
