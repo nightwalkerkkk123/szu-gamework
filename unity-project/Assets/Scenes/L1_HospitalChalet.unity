@@ -36802,7 +36802,7 @@ MonoBehaviour:
   _bodyRenderer: {fileID: 494121171}
   _skiingController: {fileID: 1531876567}
   _glucoseSystem: {fileID: 1531876565}
-  _normalColor: {r: 0, g: 1, b: 1, a: 1}
+  _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _lowWarningColor: {r: 0.5, g: 0.75, b: 1, a: 1}
   _lowCrisisColor: {r: 0.25, g: 0.45, b: 0.9, a: 1}
   _highWarningColor: {r: 1, g: 0.75, b: 0.4, a: 1}
