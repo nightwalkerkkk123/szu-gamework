@@ -551,11 +551,17 @@ namespace SugarRush.Editor
                     float x = currentX + centerDistance * cos;
                     float y = currentY - centerDistance * sin;
 
-                    // Visual snow sprite only (collider is on the continuous ground)
+                    // Visual snow sprite with per-platform collider (avoids Box2D huge-collider bugs)
                     var platform = new GameObject($"Platform_{platformIndex++}");
                     platform.transform.SetParent(groundRoot.transform);
                     platform.transform.position = new Vector3(x, y, 0f);
                     platform.transform.rotation = Quaternion.Euler(0f, 0f, -segment.SlopeAngle);
+                    platform.layer = groundLayer;
+
+                    var platCol = platform.AddComponent<BoxCollider2D>();
+                    platCol.size = new Vector2(pieceLength + 0.3f, 1.5f);
+                    platCol.offset = new Vector2(0f, -0.25f);
+                    platCol.sharedMaterial = slipperyGround;
 
                     var sr = platform.AddComponent<SpriteRenderer>();
                     var whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Placeholders/WhiteSprite.png");
