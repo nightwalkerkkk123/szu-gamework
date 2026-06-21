@@ -18,6 +18,17 @@ namespace SugarRush.Foundation
         [SerializeField] private Color _winColor = new Color(0.2f, 0.8f, 0.3f);
         [SerializeField] private Color _loseColor = new Color(0.9f, 0.2f, 0.2f);
 
+        [Header("Background")]
+        [SerializeField] private Image _backgroundImage;
+        [SerializeField] private Sprite _winBackground;
+        [SerializeField] private Sprite _loseBackground;
+
+        [Header("Flow")]
+        [Tooltip("胜利后跳转的场景名；留空 = 重玩本关。L2_Fusion_Ours 设为 LevelSelect。")]
+        [SerializeField] private string _winNextScene = "";
+
+        private bool _lastWin;
+
         private void OnEnable()
         {
             GameEvents.OnGameFinished += ShowResult;
@@ -51,6 +62,16 @@ namespace SugarRush.Foundation
 
         private void ShowResult(bool win)
         {
+            if (_backgroundImage != null)
+            {
+                Sprite bg = win ? _winBackground : _loseBackground;
+                if (bg != null)
+                {
+                    _backgroundImage.sprite = bg;
+                    _backgroundImage.enabled = true;
+                }
+            }
+
             if (_panel != null)
             {
                 _panel.SetActive(true);
@@ -68,6 +89,18 @@ namespace SugarRush.Foundation
                     ? "你成功抵达了医院雪屋。"
                     : "血糖失控或撞到了障碍，再试一次吧。";
             }
+
+            _lastWin = win;
+            if (_restartButton != null)
+            {
+                var label = _restartButton.GetComponentInChildren<Text>();
+                if (label != null)
+                {
+                    label.text = (win && !string.IsNullOrEmpty(_winNextScene))
+                        ? "返回关卡选择"
+                        : "再试一次";
+                }
+            }
         }
 
         private void RestartLevel()
@@ -82,8 +115,10 @@ namespace SugarRush.Foundation
             // Resume time before reloading so the load and subsequent gameplay run normally.
             Time.timeScale = 1f;
 
-            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Debug.Log($"[ResultPanel] Restarting scene: {sceneName}");
+            string sceneName = (_lastWin && !string.IsNullOrEmpty(_winNextScene))
+                ? _winNextScene
+                : UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Debug.Log($"[ResultPanel] Loading scene: {sceneName} (win={_lastWin})");
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
     }

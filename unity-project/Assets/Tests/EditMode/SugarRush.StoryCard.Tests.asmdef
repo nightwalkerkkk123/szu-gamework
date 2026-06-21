@@ -1,0 +1,7 @@
+{
+    "name": "SugarRush.StoryCard.Tests",
+    "references": ["SugarRush.StoryCard", "UnityEngine.UI"],
+    "optionalUnityReferences": ["TestAssemblies"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": []
+}

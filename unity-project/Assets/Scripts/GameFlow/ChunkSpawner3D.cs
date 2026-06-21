@@ -37,9 +37,25 @@ namespace SugarRush.GameFlow
         [Tooltip("Maximum vertical drop (units) between consecutive chunks. Larger spread = bumpier slope.")]
         [SerializeField] private float _maxDropPerChunk = 6f;
 
+        [Header("Finite Track")]
+        [Tooltip("0 = infinite endless run. >0 = finite: stop spawning chunks past this X distance, then place the finish line.")]
+        [SerializeField] private float _totalDistance = 0f;
+        [Tooltip("Finish line prefab (FinishLine3D + trigger collider). Instantiated at the end of a finite track.")]
+        [SerializeField] private GameObject _finishLinePrefab;
+
         private float _nextChunkX;
         private float _nextChunkY;
-        private readonly List<GameObject> _activeChunks = new();
+        private bool _finishPlaced;
+
+        // Self-managed chunk record: the spawner owns each chunk's authored end-X (computed
+        // once at spawn). Destroy decisions use this stored value — never a fragile re-derivation
+        // from live colliders, which previously mis-sized chunks and culled the ground under the player.
+        private struct ActiveChunk
+        {
+            public GameObject Go;
+            public float EndX;
+        }
+        private readonly List<ActiveChunk> _activeChunks = new();
 
         // [DIAG] Temporary instrumentation — remove once the "track runs out" bug is root-caused.
         private float _diagTimer;
@@ -89,29 +105,50 @@ namespace SugarRush.GameFlow
                 Debug.Log($"[ChunkSpawner3D-DIAG] heartbeat playerX={playerX:F1} playerY={_player.position.y:F1} nextChunkX={_nextChunkX:F1} frontierGap={_nextChunkX - playerX:F1} active={_activeChunks.Count} totalSpawned={_diagSpawnCount}");
             }
 
-            while (playerX + _spawnDistance > _nextChunkX)
+            bool finite = _totalDistance > 0f;
+            while (playerX + _spawnDistance > _nextChunkX && (!finite || _nextChunkX < _totalDistance))
             {
                 SpawnNextChunk();
             }
 
+            if (finite && !_finishPlaced && _nextChunkX >= _totalDistance)
+            {
+                PlaceFinishLine();
+            }
+
+            // Cull only chunks whose recorded end is safely behind the player. Uses the
+            // spawn-time end-X, so it can never mistake a chunk under the player for a stale one.
             for (int i = _activeChunks.Count - 1; i >= 0; i--)
             {
-                var chunk = _activeChunks[i];
-                if (chunk == null)
+                if (_activeChunks[i].Go == null)
                 {
                     _activeChunks.RemoveAt(i);
                     continue;
                 }
 
-                Bounds bounds = CalculateBounds(chunk);
-                float chunkEndX = bounds.max.x;
-
-                if (playerX - _destroyDistance > chunkEndX)
+                if (playerX - _destroyDistance > _activeChunks[i].EndX)
                 {
-                    Destroy(chunk);
+                    Destroy(_activeChunks[i].Go);
                     _activeChunks.RemoveAt(i);
                 }
             }
+        }
+
+        private void PlaceFinishLine()
+        {
+            _finishPlaced = true;
+            if (_finishLinePrefab == null)
+            {
+                Debug.LogWarning("[ChunkSpawner3D] Finite track reached its end but no finish line prefab is assigned.", this);
+                return;
+            }
+
+            // Sit the gate at the frontier, on the running descent surface. The trigger box
+            // is authored tall enough to catch the sphere regardless of the exact drop step.
+            var position = new Vector3(_nextChunkX, _nextChunkY, 0f);
+            var finish = Instantiate(_finishLinePrefab, position, Quaternion.identity, transform);
+            finish.name = "FinishLine3D";
+            Debug.Log($"[ChunkSpawner3D] Finish line placed at x={_nextChunkX:F1} y={_nextChunkY:F1}.", this);
         }
 
         private void SpawnNextChunk()
@@ -136,15 +173,14 @@ namespace SugarRush.GameFlow
             Vector3 position = new Vector3(_nextChunkX - bounds.min.x, _nextChunkY - bounds.min.y, 0f);
             chunk.transform.position = position;
 
-            _activeChunks.Add(chunk);
+            float chunkEndX = _nextChunkX + bounds.size.x;
+            _activeChunks.Add(new ActiveChunk { Go = chunk, EndX = chunkEndX });
 
-            // [DIAG] Log placement + scan for holes in the walkable ground. These chunks come
-            // from a 2D jump-runner; if the floor has gaps the auto-rolling sphere falls in.
+            // [DIAG] Log placement + scan for holes in the walkable ground.
             _diagSpawnCount++;
             float startX = _nextChunkX;
-            float endX = _nextChunkX + bounds.size.x;
             float biggestGap = LargestGroundGapX(chunk);
-            Debug.Log($"[ChunkSpawner3D-DIAG] spawn #{_diagSpawnCount} {chunk.name} X[{startX:F1}..{endX:F1}] boundsW={bounds.size.x:F1} defWidth={definition.Width} topY={bounds.max.y:F1} biggestFloorGapX={biggestGap:F1}");
+            Debug.Log($"[ChunkSpawner3D-DIAG] spawn #{_diagSpawnCount} {chunk.name} X[{startX:F1}..{chunkEndX:F1}] boundsW={bounds.size.x:F1} defWidth={definition.Width} topY={bounds.max.y:F1} biggestFloorGapX={biggestGap:F1}");
             if (biggestGap > 1.5f)
             {
                 Debug.LogWarning($"[ChunkSpawner3D-DIAG] HOLE in {chunk.name}: {biggestGap:F1}-unit gap in the floor — the rolling sphere will fall through here.");

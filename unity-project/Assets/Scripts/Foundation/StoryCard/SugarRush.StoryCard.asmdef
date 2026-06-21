@@ -1,0 +1,8 @@
+{
+    "name": "SugarRush.StoryCard",
+    "references": ["UnityEngine.UI"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": true
+}
