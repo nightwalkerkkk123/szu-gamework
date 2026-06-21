@@ -12,6 +12,11 @@ namespace SugarRush.Gameplay
         [field: SerializeField, TextArea] public string Description { get; private set; } = "";
         [field: SerializeField] public Sprite Icon { get; private set; }
 
+        [Header("Audio")]
+        [Tooltip("拾取时播放的音效。")]
+        [SerializeField] private AudioClip _pickupSfx;
+        public AudioClip PickupSfx => _pickupSfx;
+
         /// <summary>
         /// Applies the effect. Called when the player uses the item.
         /// </summary>
