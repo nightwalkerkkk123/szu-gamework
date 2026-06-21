@@ -11,4 +11,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/L2_Fusion.unity
     guid: ce1641a8b435f2342b9a2dd915d346ea
+  - enabled: 1
+    path: Assets/Scenes/StartScene.unity
+    guid: 69feeb44a0c792444becdd3ec6780561
+  - enabled: 1
+    path: Assets/Scenes/L2_Fusion_Ours.unity
+    guid: 88d6f4a0fc5f48a4ba18784aa2eccd83
+  - enabled: 1
+    path: Assets/Scenes/LevelSelect.unity
+    guid: 0fb897053d770b04bb378e0f07c15a36
   m_configObjects: {}
