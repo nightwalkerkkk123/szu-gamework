@@ -16,6 +16,8 @@ namespace SugarRush.Foundation.StoryCard
         [SerializeField] private Image _pageImage;
         [SerializeField] private GameObject _nextHint;
         [SerializeField] private bool _freezeGameplay = true;
+        [Tooltip("勾选时 Start 自动播放；取消勾选则由外部调用 Play()（如视频过场结束后）")]
+        [SerializeField] private bool _autoPlayOnStart = true;
 
         public UnityEvent OnComplete;
 
@@ -26,6 +28,15 @@ namespace SugarRush.Foundation.StoryCard
         private bool _active;
 
         private void Start()
+        {
+            if (_autoPlayOnStart) Play();
+        }
+
+        /// <summary>
+        /// Begin playing the sequences. Call externally when _autoPlayOnStart is false
+        /// (e.g. handed off from an intro video's OnFinished event).
+        /// </summary>
+        public void Play()
         {
             _playing = StoryProgress.ResolvePlayable(_sequences, _store);
             _pages = StoryProgress.FlattenPages(_playing);
