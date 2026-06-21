@@ -26,6 +26,13 @@ namespace SugarRush.Gameplay
                 other.TryGetComponent<SkiingController>(out var skiingController))
             {
                 _consumed = true;
+
+                // Play pickup sound effect
+                if (_itemEffect.PickupSfx != null)
+                {
+                    AudioSource.PlayClipAtPoint(_itemEffect.PickupSfx, transform.position);
+                }
+
                 _itemEffect.Apply(glucoseSystem, skiingController);
                 OnItemPickedUp?.Invoke(this, _itemEffect, other.gameObject);
                 Debug.Log($"[PickupItem] Picked up {_itemEffect.DisplayName}.", this);
