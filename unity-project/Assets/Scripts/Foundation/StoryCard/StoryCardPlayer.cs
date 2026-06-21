@@ -50,6 +50,10 @@ namespace SugarRush.Foundation.StoryCard
         {
             if (!_active) return;
 
+            // Re-assert the freeze every frame: other components' Start() (e.g. GameFlowManager
+            // EnterIntro) set timeScale = 1 and would otherwise let gameplay run behind the card.
+            if (_freezeGameplay) Time.timeScale = 0f;
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Complete();
