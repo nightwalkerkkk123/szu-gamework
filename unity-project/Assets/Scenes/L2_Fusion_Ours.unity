@@ -6413,21 +6413,27 @@ MonoBehaviour:
   _chunks:
   - Prefab: {fileID: 2720118546084977080, guid: c13b634ec7d964e26a4e6a7655484032, type: 3}
     Width: 96.7
-    Weight: 2
+    Weight: 1
   - Prefab: {fileID: 4452362603638627973, guid: 1ff12ad92c11246e9b946730a3d8dd21, type: 3}
     Width: 96.7
-    Weight: 2
+    Weight: 1
   - Prefab: {fileID: 2818999740425733664, guid: 593a4ce3ce0d3494da846519c69da8f0, type: 3}
     Width: 96.7
-    Weight: 2
+    Weight: 1
   - Prefab: {fileID: 291846930403125035, guid: af57396bccffb4c029fbce64546e2e1e, type: 3}
+    Width: 96.7
+    Weight: 1
+  - Prefab: {fileID: 5506573349550566804, guid: 783be3037c64a46bbb06a809daa0b1de, type: 3}
+    Width: 96.7
+    Weight: 1
+  - Prefab: {fileID: 6929538768049152326, guid: 62126ba43fa9f4b54b68e76de6cd2618, type: 3}
     Width: 96.7
     Weight: 1
   _spawnDistance: 80
   _destroyDistance: 60
   _initialChunkCount: 2
-  _minDropPerChunk: 1
-  _maxDropPerChunk: 6
+  _minDropPerChunk: 0
+  _maxDropPerChunk: 0
   _totalDistance: 5500
   _finishLinePrefab: {fileID: 4785617025455779458, guid: ee61c822419ea4c5cafada707b12efb6, type: 3}
 --- !u!114 &1945933228
@@ -6442,7 +6448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5748902a25a39ed4f89afa52536f2e5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _levelData: {fileID: 11400000, guid: e37f2979aa20abf489128679049ba326, type: 2}
+  _levelData: {fileID: 11400000, guid: ba45b470cf4ab42abb805d17a3c17957, type: 2}
   _player: {fileID: 11965878}
   _startPoint: {fileID: 0}
 --- !u!114 &1945933229

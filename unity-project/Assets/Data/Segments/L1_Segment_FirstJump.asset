@@ -33,5 +33,9 @@ MonoBehaviour:
     HeightMeters: 0
     Size: {x: 0.9, y: 0.4}
     Color: {r: 0.4, g: 0.65, b: 0.3, a: 1}
-  <Pickups>k__BackingField: []
+  <Pickups>k__BackingField:
+  - DistanceAlongSegment: 100
+    HeightOffset: 1.5
+    ItemEffect: {fileID: 11400000, guid: d10566a17c5c54568b067b48ee2397e3, type: 2}
+    Color: {r: 0, g: 1, b: 1, a: 1}
   <Hazards>k__BackingField: []

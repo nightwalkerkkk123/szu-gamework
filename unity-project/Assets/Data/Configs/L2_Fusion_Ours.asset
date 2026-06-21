@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e10fdcea86daa341a0c0b51a0da0b87, type: 3}
+  m_Name: L2_Fusion_Ours
+  m_EditorClassIdentifier: 
+  <LevelId>k__BackingField: L2
+  <DisplayName>k__BackingField: "\u96EA\u5C71\u72C2\u98D9"
+  <Description>k__BackingField: "3D \u878D\u5408\u65E0\u9650\u6ED1\u96EA\u5173\uFF1A\u7A7F\u8D8A\u591A\u6837\u96EA\u5730\u5730\u5F62\uFF0C\u5403\u7CD6\u7EF4\u6301\u8840\u7CD6\uFF0C\u51B2\u5411\u7EC8\u70B9\u7AD9\u3002"
+  <TargetDistanceMeters>k__BackingField: 5500
+  <ParTimeSeconds>k__BackingField: 240
+  <StartGlucose>k__BackingField: 60
+  <BaseScore>k__BackingField: 1000
+  <TimeBonusMultiplier>k__BackingField: 10
+  <Segments>k__BackingField: []
