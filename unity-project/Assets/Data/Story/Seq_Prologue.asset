@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2f6eaae97246495e80fb75a1530e55a, type: 3}
+  m_Name: Seq_Prologue
+  m_EditorClassIdentifier: 
+  PlayOnceKey: sr_story_prologue
+  Pages:
+  - {fileID: 21300000, guid: 5804d586ea4d34aadb9294a7300c8506, type: 3}
+  - {fileID: 21300000, guid: 4f4ac2998652e4d4d96e6bb7833cb6f9, type: 3}
+  - {fileID: 21300000, guid: b5de22b594833476b88de7e54f061986, type: 3}
+  - {fileID: 21300000, guid: d3da257d1bb4e43ce9dece1773dc308d, type: 3}
